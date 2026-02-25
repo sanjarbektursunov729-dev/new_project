@@ -1,0 +1,318 @@
+{% extends "accounts/superadmin/base_superadmin.html" %}
+
+{% block title %}Tekshiruv{% endblock %}
+{% block nav_pending %}active{% endblock %}
+{% block crumb %}Superadmin • Tekshiruv{% endblock %}
+
+{% block content %}
+
+{# ===== TOAST (faqat superadmin: extra_tags="sb") ===== #}
+{% if messages %}
+  <div id="toast-wrap" class="toast-wrap" aria-live="polite" aria-atomic="true">
+    {% for message in messages %}
+      {% if 'sb' in message.tags %}
+        <div class="toast
+          {% if 'success' in message.tags %}toast-success
+          {% elif 'error' in message.tags %}toast-error
+          {% elif 'warning' in message.tags %}toast-warning
+          {% else %}toast-info
+          {% endif %}">
+          <div class="toast-dot" aria-hidden="true"></div>
+
+          <div class="toast-icon" aria-hidden="true">
+            {% if 'success' in message.tags %}
+              <i class="fa-solid fa-circle-check"></i>
+            {% elif 'error' in message.tags %}
+              <i class="fa-solid fa-circle-xmark"></i>
+            {% elif 'warning' in message.tags %}
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            {% else %}
+              <i class="fa-solid fa-circle-info"></i>
+            {% endif %}
+          </div>
+
+          <div class="toast-text">{{ message }}</div>
+
+          <button type="button" class="toast-close" aria-label="Yopish" onclick="closeToast(this)">×</button>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="pagehead">
+  <div>
+    <h1>Tekshiruv</h1>
+    <div class="sub">Admin yuborgan loyihalar</div>
+  </div>
+</div>
+
+<div class="card pending-card">
+  {# ===== DESKTOP TABLE ===== #}
+  <div class="table-wrap">
+    <table class="pending-table">
+      <thead>
+        <tr>
+          <th>Loyiha</th>
+          <th>Muallif</th>
+          <th>Yuborilgan</th>
+          <th>Amal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in projects %}
+          <tr class="row">
+            <td class="cell cell-project">
+              <div class="proj">
+                {% if p.image %}
+                  <img class="thumb" src="{{ p.image.url }}" alt="image">
+                {% else %}
+                  <div class="thumb thumb-empty"></div>
+                {% endif %}
+                <div class="proj-meta">
+                  <div class="proj-title">{{ p.title }}</div>
+                  <div class="proj-desc">{{ p.short_desc }}</div>
+                </div>
+              </div>
+            </td>
+
+            <td class="cell cell-muted">{{ p.author.username }}</td>
+            <td class="cell cell-muted">{{ p.created_at|date:"H:i d-m-Y" }}</td>
+
+            <td class="cell cell-action">
+              <a class="btn-action" href="{% url 'superadmin_review' p.id %}">Ko‘rib chiqish</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" class="empty">Hozircha tekshiruvga kelgan loyiha yo‘q.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# ===== MOBILE/TABLET CARDS ===== #}
+  <div class="m-list">
+    {% for p in projects %}
+      <div class="m-item">
+        <div class="m-top">
+          {% if p.image %}
+            <img class="m-thumb" src="{{ p.image.url }}" alt="image">
+          {% else %}
+            <div class="m-thumb m-thumb-empty"></div>
+          {% endif %}
+
+          <div class="m-meta">
+            <div class="m-title">{{ p.title }}</div>
+            <div class="m-desc">{{ p.short_desc }}</div>
+
+            <div class="m-chips">
+              <span class="chip">👤 {{ p.author.username }}</span>
+              <span class="chip">🕒 {{ p.created_at|date:"H:i d-m-Y" }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="m-actions">
+          <a class="btn-action w100" href="{% url 'superadmin_review' p.id %}">Ko‘rib chiqish</a>
+        </div>
+      </div>
+    {% empty %}
+      <div class="m-empty">Hozircha tekshiruvga kelgan loyiha yo‘q.</div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+  /* ===== PAGE HEAD ===== */
+  .pagehead{
+    display:flex; align-items:flex-end; justify-content:space-between;
+    gap:12px; flex-wrap:wrap; padding:16px 2px;
+  }
+  .pagehead h1{ margin:0; font-size:26px; }
+  .pagehead .sub{ color:rgba(234,242,255,.62); font-size:13px; margin-top:6px; }
+
+  /* ===== CARD ===== */
+  .pending-card{ padding: 14px; }
+  .table-wrap{ width:100%; overflow:auto; }
+
+  /* ===== TABLE ===== */
+  .pending-table{ width:100%; border-collapse:separate; border-spacing:0 10px; min-width: 780px; }
+  .pending-table thead th{
+    text-align:left; font-size:12px; color:rgba(234,242,255,.62); padding:8px 12px; white-space:nowrap;
+  }
+  .row{ background: rgba(255,255,255,.04); }
+  .cell{
+    padding:14px 12px;
+    border-top:1px solid rgba(255,255,255,.10);
+    border-bottom:1px solid rgba(255,255,255,.10);
+    vertical-align: top;
+  }
+  .row .cell:first-child{
+    border-left:1px solid rgba(255,255,255,.10);
+    border-top-left-radius:16px; border-bottom-left-radius:16px;
+  }
+  .row .cell:last-child{
+    border-right:1px solid rgba(255,255,255,.10);
+    border-top-right-radius:16px; border-bottom-right-radius:16px;
+  }
+  .cell-muted{ color:rgba(234,242,255,.62); white-space:nowrap; }
+  .cell-action{ width: 170px; }
+
+  .proj{ display:flex; gap:10px; align-items:flex-start; min-width: 340px; }
+  .thumb{
+    width:56px; height:42px; border-radius:12px; object-fit:cover;
+    border:1px solid rgba(255,255,255,.10);
+    flex:0 0 56px;
+  }
+  .thumb-empty{ background: rgba(255,255,255,.06); }
+  .proj-meta{ min-width:0; }
+  .proj-title{ font-weight:800; }
+  .proj-desc{
+    color:rgba(234,242,255,.62); font-size:12px; margin-top:6px;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+
+  .btn-action{
+    display:inline-flex; justify-content:center; align-items:center;
+    padding:10px 12px; border-radius:14px;
+    border:1px solid rgba(0,212,255,.35);
+    background: rgba(0,212,255,.10);
+    font-weight:800;
+    text-decoration:none;
+    white-space:nowrap;
+  }
+  .btn-action.w100{ width:100%; }
+
+  .empty{
+    padding:18px; color:rgba(234,242,255,.62); border:none;
+  }
+
+  /* ===== MOBILE/TABLET LIST (default hidden) ===== */
+  .m-list{ display:none; }
+  .m-item{
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.04);
+    border-radius: 18px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  .m-top{ display:flex; gap:12px; align-items:flex-start; }
+  .m-thumb{
+    width: 76px; height: 60px; border-radius: 14px; object-fit: cover;
+    border:1px solid rgba(255,255,255,.10);
+    flex: 0 0 76px;
+  }
+  .m-thumb-empty{ background: rgba(255,255,255,.06); }
+  .m-meta{ min-width:0; flex:1; }
+  .m-title{ font-weight:900; font-size: 15px; }
+  .m-desc{
+    color: rgba(234,242,255,.62);
+    font-size: 12px;
+    margin-top: 6px;
+    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .m-chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .chip{
+    display:inline-flex; align-items:center; gap:6px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.18);
+    color: rgba(234,242,255,.78);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .m-actions{ margin-top: 12px; }
+
+  .m-empty{
+    border:1px dashed rgba(255,255,255,.16);
+    border-radius: 18px;
+    padding: 14px;
+    color: rgba(234,242,255,.62);
+  }
+
+  /* ===== SWITCH BREAKPOINTS ===== */
+  @media (max-width: 980px){
+    .table-wrap{ display:none; }
+    .m-list{ display:block; }
+    .pending-card{ padding: 12px; }
+    .pagehead h1{ font-size: 22px; }
+  }
+
+  /* ===== TOAST ===== */
+  .toast-wrap{
+    position: fixed; top: 18px; right: 18px;
+    z-index: 9999;
+    display: flex; flex-direction: column; gap: 10px;
+    width: min(440px, calc(100vw - 28px));
+    pointer-events: none;
+  }
+  .toast{
+    pointer-events: auto;
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(10,16,24,.82);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    animation: toastIn .22s ease;
+  }
+  .toast-dot{ width: 10px; height: 10px; border-radius: 999px; margin-top: 6px; background: rgba(0,212,255,.9); flex: 0 0 10px; }
+  .toast-icon{ margin-top: 2px; font-size: 18px; line-height: 1; opacity: .95; }
+  .toast-text{ font-size: 13px; line-height: 1.55; color: rgba(234,242,255,.92); word-break: break-word; flex: 1; min-width: 0; }
+  .toast-close{ margin-left: auto; background: transparent; border: none; color: rgba(234,242,255,.65); cursor: pointer; font-size: 18px; line-height: 1; padding: 0 2px; }
+  .toast-close:hover{ color: rgba(234,242,255,.9); }
+
+  .toast-success{ border-color: rgba(34,197,94,.35) !important; }
+  .toast-success .toast-dot{ background: rgba(34,197,94,.95) !important; }
+  .toast-success .toast-icon{ color: rgba(34,197,94,.95) !important; }
+
+  .toast-error{ border-color: rgba(239,68,68,.35) !important; }
+  .toast-error .toast-dot{ background: rgba(239,68,68,.95) !important; }
+  .toast-error .toast-icon{ color: rgba(239,68,68,.95) !important; }
+
+  .toast-warning{ border-color: rgba(245,158,11,.35) !important; }
+  .toast-warning .toast-dot{ background: rgba(245,158,11,.95) !important; }
+  .toast-warning .toast-icon{ color: rgba(245,158,11,.95) !important; }
+
+  .toast-info{ border-color: rgba(0,212,255,.35) !important; }
+  .toast-info .toast-dot{ background: rgba(0,212,255,.95) !important; }
+  .toast-info .toast-icon{ color: rgba(0,212,255,.95) !important; }
+
+  @keyframes toastIn{ from{ opacity:0; transform: translateY(-6px) scale(.98);} to{ opacity:1; transform: translateY(0) scale(1);} }
+
+  @media (max-width: 600px){
+    .toast-wrap{ top: 12px; right: 12px; width: calc(100vw - 24px); }
+    .toast{ border-radius: 14px; }
+  }
+</style>
+
+<script>
+  function closeToast(btn){
+    const el = btn.closest('.toast');
+    if(!el) return;
+    el.style.transition = "opacity .28s, transform .28s";
+    el.style.opacity = "0";
+    el.style.transform = "translateY(-6px)";
+    setTimeout(() => el.remove(), 300);
+  }
+
+  // avtomatik yo‘qolish (xohlasang olib tashlab qo'yasan)
+  setTimeout(() => {
+    const wrap = document.getElementById("toast-wrap");
+    if(!wrap) return;
+    [...wrap.children].forEach((el, i) => {
+      setTimeout(() => {
+        el.style.transition = "opacity .35s, transform .35s";
+        el.style.opacity = "0";
+        el.style.transform = "translateY(-6px)";
+        setTimeout(() => el.remove(), 380);
+      }, 2600 + i*220);
+    });
+  }, 700);
+</script>
+
+{% endblock %}

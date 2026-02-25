@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Robo & AI Lab{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --bg: #070b14;
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.1);
+      --accent: #00d4ff;
+      --text: #ffffff;
+      --muted: rgba(255, 255, 255, 0.6);
+      --gradient: radial-gradient(circle at 18% 0%, rgba(65, 88, 208, 0.2) 0%, rgba(0, 212, 255, 0.1) 50%, transparent 100%);
+    }
+
+    *{ box-sizing:border-box; }
+
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      background-image: var(--gradient);
+      color: var(--text);
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 18px;
+    }
+
+    /* ===== Topbar ===== */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(7,11,20,.78), rgba(7,11,20,.35));
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: .3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .logo-dot{
+      width:12px; height:12px;
+      background:var(--accent);
+      border-radius:50%;
+      box-shadow: 0 0 16px rgba(0,212,255,.55);
+      flex:0 0 12px;
+    }
+
+    .nav-right {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .tag {
+      background: rgba(255,255,255,0.05);
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      display: inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .nav-toggle{
+      display:none;
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    /* Mobile dropdown */
+    .nav-drop{
+      display:none;
+      position: absolute;
+      right: 18px;
+      top: 64px;
+      width: min(320px, calc(100vw - 36px));
+      background: rgba(10,16,26,.85);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 18px;
+      padding: 10px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 16px 40px rgba(0,0,0,.45);
+    }
+    .nav-drop .tag{ width:100%; justify-content:center; padding: 12px; }
+
+    /* ===== Hero ===== */
+    .hero {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 22px;
+      margin: 22px 0 10px;
+      align-items: start;
+    }
+
+    .hero-text{
+      padding: 22px 18px;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.02);
+    }
+
+    .hero-text h1 {
+      font-size: 40px;
+      margin: 0 0 12px;
+      font-weight: 850;
+      line-height: 1.12;
+      letter-spacing: .2px;
+    }
+    .hero-text p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    /* Stats Card */
+    .stats-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 22px;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+    .stats-card:before{
+      content:"";
+      position:absolute;
+      inset:-60px -60px auto auto;
+      width:180px; height:180px;
+      background: radial-gradient(circle, rgba(0,212,255,.18), transparent 60%);
+      filter: blur(2px);
+      pointer-events:none;
+    }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0 8px; }
+    .stat-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      padding: 14px 12px;
+      border-radius: 14px;
+      text-align: center;
+    }
+    .stat-box span { display: block; font-size: 22px; font-weight: 900; color: var(--accent); }
+    .stat-box small { color: var(--muted); font-size: 11px; }
+
+    /* Search & Filters */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .search-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      flex-grow: 1;
+      min-width: 220px;
+    }
+    .search-bar input {
+      background: transparent;
+      border: none;
+      color: white;
+      margin-left: 10px;
+      width: 100%;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .filter-btns {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      transition: .2s;
+      white-space: nowrap;
+    }
+    .filter-btn.active {
+      background: rgba(26, 37, 58, .85);
+      color: white;
+      border: 1px solid rgba(255,255,255,.10);
+    }
+
+    .btn-refresh {
+      background: rgba(26, 37, 58, .85);
+      border: 1px solid var(--border);
+      padding: 12px 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      color: white;
+      display: inline-flex;
+      align-items:center;
+      gap: 10px;
+      transition: .2s;
+      width: fit-content;
+    }
+    .btn-refresh:hover{ transform: translateY(-1px); opacity: .95; }
+
+    .info-footer {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ===== Content Grid wrapper ===== */
+    .grid{
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+      margin-top: 18px;
+      padding-bottom: 30px;
+    }
+    .grid > *{
+      grid-column: span 4;
+      min-width: 0;
+    }
+
+    /* (Agar kartalarga class berilgan bo‘lsa, o‘zi hover oladi) */
+    .card-hover{
+      transition: .2s;
+      will-change: transform;
+    }
+    .card-hover:hover{
+      transform: translateY(-3px);
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 980px){
+      .hero{ grid-template-columns: 1fr; }
+      .hero-text h1{ font-size: 34px; }
+      .grid > *{ grid-column: span 6; }
+      .stats-card{ order: -1; }
+    }
+
+    @media (max-width: 640px){
+      .container{ padding: 14px; }
+      .hero-text{ padding: 18px 14px; }
+      .hero-text h1{ font-size: 28px; }
+      .search-bar{ min-width: 0; width: 100%; }
+      .filter-btns{ width: 100%; justify-content: space-between; }
+      .btn-refresh{ width: 100%; justify-content: center; }
+      .grid{ gap: 14px; }
+      .grid > *{ grid-column: span 12; }
+      .nav-right{ display:none; }
+      .nav-toggle{ display:inline-flex; align-items:center; justify-content:center; }
+      .nav-drop{ display:none; }
+      .navbar{ position: sticky; }
+    }
+
+    {% block extra_css %}{% endblock %}
+  </style>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="navbar">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      Robo & AI Lab
+    </div>
+
+    <button class="nav-toggle" type="button" aria-label="Menu" onclick="toggleNavDrop()">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <div class="nav-right">
+      <div class="tag"><i class="fa-solid fa-moon"></i> Tun/Kun</div>
+      <div class="tag"><i class="fa-solid fa-link"></i> API</div>
+    </div>
+
+    <div id="navDrop" class="nav-drop" aria-hidden="true">
+      <div class="tag"><i class="fa-solid fa-moon"></i> Tun/Kun</div>
+      <div class="tag"><i class="fa-solid fa-link"></i> API</div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-text">
+      <h1>Loyihalarni chiroyli ko‘rinishda ko‘ring</h1>
+      <p>Bu sayt API orqali keladigan JSON ma'lumotlardan AI va robototexnika loyihalarini avtomatik chiqaradi. Qidiruv, filter, tun/kuni rejimi va to'liq sahifa mavjud.</p>
+
+      <div class="controls">
+        <div class="search-bar">
+          <i class="fa-solid fa-magnifying-glass" style="color:var(--muted)"></i>
+          <input type="text" placeholder="Masalan: vision, robot, PCA...">
+        </div>
+
+        <div class="filter-btns">
+          <button class="filter-btn active" type="button">Hammasi</button>
+          <button class="filter-btn" type="button">AI</button>
+          <button class="filter-btn" type="button">Robototexnika</button>
+        </div>
+
+        <button class="btn-refresh" type="button">
+          <i class="fa-solid fa-arrows-rotate"></i> Yangilash
+        </button>
+      </div>
+
+      <div class="info-footer">
+        <span class="tag">3 ta loyiha</span>
+        <span class="tag" style="color:#00ff88">Tayyor</span>
+        <span class="tag">Manba: 127.0.0.1:8000/api/projects/</span>
+      </div>
+    </div>
+
+    <div class="stats-card">
+      <h3 style="margin:0 0 6px;">Tezkor ko‘rsatkich</h3>
+      <div class="stats-grid">
+        <div class="stat-box"><span>3</span><small>Jami loyiha</small></div>
+        <div class="stat-box"><span>1</span><small>AI</small></div>
+        <div class="stat-box"><span>1</span><small>Robot</small></div>
+      </div>
+      <p style="font-size: 13px; color: var(--muted); margin: 10px 0 0;">
+        Kartani bosib to‘liq ma’lumotni ko‘rasiz (YouTube + ZIP).
+      </p>
+    </div>
+  </div>
+
+  <div class="grid">
+    {% block content %}{% endblock %}
+  </div>
+
+</div>
+
+<script>
+  function toggleNavDrop(){
+    const el = document.getElementById("navDrop");
+    if(!el) return;
+    const isOpen = el.style.display === "block";
+    el.style.display = isOpen ? "none" : "block";
+    el.setAttribute("aria-hidden", isOpen ? "true" : "false");
+  }
+
+  // Tashqarini bossang yopilsin (mobile)
+  document.addEventListener("click", (e) => {
+    const drop = document.getElementById("navDrop");
+    const btn = document.querySelector(".nav-toggle");
+    if(!drop || !btn) return;
+    const clickedInside = drop.contains(e.target) || btn.contains(e.target);
+    if(!clickedInside) {
+      drop.style.display = "none";
+      drop.setAttribute("aria-hidden", "true");
+    }
+  });
+</script>
+
+</body>
+</html>

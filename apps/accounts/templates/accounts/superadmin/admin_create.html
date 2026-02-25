@@ -1,0 +1,143 @@
+{% extends "accounts/superadmin/base_superadmin.html" %}
+
+{% block title %}Admin yaratish{% endblock %}
+{% block nav_admins %}active{% endblock %}
+{% block crumb %}Superadmin • Admin yaratish{% endblock %}
+
+{% block content %}
+<style>
+  .page-wrap{max-width:1200px;margin:0 auto;}
+  .headrow{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .pagetitle{margin:0;font-size:22px;}
+  .pagesub{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.55;}
+  .formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:720px){.formgrid{grid-template-columns:1fr;}}
+  .field label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px;}
+
+  .card input, .card select, .card textarea{
+    width:100%;
+    padding:12px 12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.04);
+    outline:none;
+  }
+  .card input:focus, .card select:focus, .card textarea:focus{
+    border-color: rgba(0,212,255,.40);
+    box-shadow:0 0 0 3px rgba(0,212,255,.08);
+  }
+
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+  .btn{
+    padding:12px 14px;border-radius:14px;
+    border:1px solid rgba(0,212,255,.40);
+    background: rgba(0,212,255,.10);
+    cursor:pointer;
+    font-weight:800;
+  }
+  .btn:hover{background: rgba(0,212,255,.16); box-shadow:0 0 0 3px rgba(0,212,255,.10) inset;}
+  .btn2{
+    padding:12px 14px;border-radius:14px;
+    border:1px solid var(--line);
+    background: rgba(0,0,0,.12);
+    display:inline-flex;align-items:center;gap:8px;
+  }
+
+  .hint{
+    margin-top:10px;
+    padding:12px 14px;
+    border-radius:16px;
+    border:1px dashed rgba(255,255,255,.14);
+    background: rgba(0,0,0,.10);
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.55;
+  }
+
+  @media (max-width: 520px){
+    .actions > *{flex:1;}
+    .actions .btn, .actions .btn2{width:100%; justify-content:center;}
+  }
+</style>
+
+<div class="page-wrap">
+  <div class="headrow">
+    <div>
+      <h1 class="pagetitle">Admin yaratish</h1>
+      <p class="pagesub">Ism, familiya va email kiriting — login va parol avtomatik yaratiladi.</p>
+    </div>
+
+    <a class="btn2" href="{% url 'superadmin_admin_list' %}">
+      <i class="fa-solid fa-arrow-left"></i> Orqaga
+    </a>
+  </div>
+
+  <div class="card">
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="hint" style="border-color: rgba(239,68,68,.35); color: rgba(234,242,255,.85);">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <div class="formgrid">
+        <div class="field">
+          <label>{{ form.first_name.label }}</label>
+          {{ form.first_name }}
+          {% if form.first_name.errors %}
+            <div class="hint" style="margin-top:8px;border-color: rgba(239,68,68,.35);">
+              {{ form.first_name.errors }}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="field">
+          <label>{{ form.last_name.label }}</label>
+          {{ form.last_name }}
+          {% if form.last_name.errors %}
+            <div class="hint" style="margin-top:8px;border-color: rgba(239,68,68,.35);">
+              {{ form.last_name.errors }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:12px;">
+        <label>{{ form.email.label }}</label>
+        {{ form.email }}
+        {% if form.email.errors %}
+          <div class="hint" style="margin-top:8px;border-color: rgba(239,68,68,.35);">
+            {{ form.email.errors }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="hint">
+        <b style="color:rgba(234,242,255,.85)">Eslatma:</b> Admin yaratilgandan keyin login va parol sizga xabar orqali chiqadi va uni yozib olishingiz shart aks holda sahifa yangilansa login va parol o'chib ketadi.
+      </div>
+
+      <div class="actions">
+        <button class="btn" type="submit">
+          <i class="fa-solid fa-user-plus" style="margin-right:8px;"></i>
+          Yaratish
+        </button>
+
+        <a class="btn2" href="{% url 'superadmin_admin_list' %}">
+          <i class="fa-regular fa-circle-xmark"></i> Bekor qilish
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll(".card input").forEach(i => {
+    i.setAttribute("autocomplete","off");
+  });
+</script>
+{% endblock %}

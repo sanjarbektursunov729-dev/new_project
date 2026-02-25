@@ -1,0 +1,212 @@
+{% extends "accounts/superadmin/base_superadmin.html" %}
+
+{% block title %}Barcha loyihalar{% endblock %}
+{% block nav_allprojects %}active{% endblock %}
+{% block crumb %}Superadmin • Barcha loyihalar{% endblock %}
+
+{% block content %}
+<style>
+    /* --- Toast va Umumiy Stylelar --- */
+    .toast-wrap { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; width: min(400px, calc(100vw - 40px)); pointer-events: none; }
+    .toast { pointer-events: auto; display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.4); animation: toastIn 0.3s ease forwards; }
+    .toast-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex: 0 0 8px; }
+    .toast-icon { margin-top: 1px; font-size: 18px; }
+    .toast-text { font-size: 14px; line-height: 1.4; color: #f8fafc; flex: 1; word-break: break-word; }
+    .toast-close { background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 20px; line-height: 1; padding: 0 4px; margin-left: 8px; transition: 0.2s; }
+
+    .toast-success { border-color: rgba(34, 197, 94, 0.4); }
+    .toast-success .toast-dot { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    .toast-success .toast-icon { color: #22c55e; }
+    .toast-error { border-color: rgba(239, 68, 68, 0.4); }
+    .toast-error .toast-dot { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+    .toast-error .toast-icon { color: #ef4444; }
+
+    /* --- RESPONSIVE TABLE CSS --- */
+    .table-container { width: 100%; overflow-x: auto; }
+
+    @media (max-width: 992px) {
+        /* Jadval sarlavhasini yashiramiz */
+        thead { display: none; }
+
+        /* Har bir qatorni alohida blok (kartochka) qilamiz */
+        tbody tr {
+            display: block;
+            margin-bottom: 15px;
+            border-radius: 16px !important;
+            border: 1px solid rgba(255,255,255,.10) !important;
+            background: rgba(255,255,255,.02) !important;
+            padding: 10px;
+        }
+
+        tbody td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: none !important;
+            padding: 8px 12px !important;
+            text-align: right;
+            font-size: 13px;
+        }
+
+        /* Har bir element oldidan "Label" qo'shamiz */
+        tbody td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: rgba(234,242,255,.5);
+            text-align: left;
+            margin-right: 10px;
+        }
+
+        /* Birinchi va Oxirgi td stili */
+        tbody td:first-child { border-radius: 0 !important; border-bottom: 1px solid rgba(255,255,255,0.05) !important; width: 100%; justify-content: flex-start; }
+        tbody td:last-child { border-radius: 0 !important; width: 100%; justify-content: center; margin-top: 10px; }
+
+        .project-info-cell { flex-direction: column; align-items: flex-end !important; text-align: right; }
+    }
+
+    @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+</style>
+
+{% if messages %}
+  <div id="toast-wrap" class="toast-wrap">
+    {% for message in messages %}
+      {% if 'sj' in message.tags %}
+        <div class="toast {% if 'success' in message.tags %}toast-success{% elif 'error' in message.tags %}toast-error{% else %}toast-info{% endif %}">
+          <div class="toast-dot"></div>
+          <div class="toast-text">{{ message }}</div>
+          <button type="button" class="toast-close" onclick="closeToast(this)">×</button>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div style="padding:16px 2px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+  <div>
+    <h1 style="margin:0; font-size:24px;">Barcha loyihalar</h1>
+    <p style="color:rgba(234,242,255,.62); font-size:13px; margin:4px 0 0 0;">Loyiha holatini boshqarish va nazorat qilish.</p>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:12px; padding: 15px;">
+  <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+    <input name="q" value="{{ q }}" placeholder="Qidirish: title / author / izoh..."
+           style="flex:1; min-width:220px; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); color:#fff; outline:none;">
+
+    <select name="status"
+            style="padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,.10); background: rgba(15, 23, 42, 0.9); color:#fff; outline:none; cursor:pointer;">
+      <option value="" style="background: #1e293b; color: #fff;">Barcha status</option>
+      {% for val,label in status_choices %}
+        <option value="{{ val }}" {% if status == val %}selected{% endif %} style="background: #1e293b; color: #fff;">
+          {{ val }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <button type="submit"
+            style="padding:12px 14px; border-radius:14px; border:1px solid rgba(0,212,255,.40); background: rgba(0,212,255,.10); color: #eaf2ff; font-weight:750; cursor:pointer;">
+      Qidirish
+    </button>
+  </form>
+</div>
+
+<form method="post" action="{% url 'superadmin_projects_bulk_delete' %}" id="bulkForm">
+  {% csrf_token %}
+  <div class="card" style="margin-bottom:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; padding: 12px;">
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button type="button" id="selectAllBtn" style="padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,0.05); color:#fff; cursor:pointer;">Hammasi</button>
+      <span id="selectedCount" style="color:rgba(234,242,255,.6); font-size:13px;">0 ta tanlandi</span>
+    </div>
+    <button type="submit" onclick="return confirmBulkDelete();" style="padding:8px 15px; border-radius:10px; border:1px solid #ef4444; background: rgba(239,68,68,0.1); color:#ef4444; font-weight:600; cursor:pointer;">O‘chirish</button>
+  </div>
+
+  <div class="card table-container">
+    <table style="width:100%; border-collapse:separate; border-spacing:0 8px;">
+      <thead>
+        <tr style="text-align:left; font-size:12px; color:rgba(234,242,255,.5);">
+          <th style="padding:10px;"><input type="checkbox" id="selectAllHead"></th>
+          <th>Loyiha</th>
+          <th>Muallif</th>
+          <th>Status</th>
+          <th>Yaratilgan</th>
+          <th>Yuborilgan</th>
+          <th>Tasdiqlangan</th>
+          <th>Yuklangan</th>
+          <th>Amal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in projects %}
+          <tr style="background: rgba(255,255,255,.03);">
+            <td data-label="Tanlash" style="padding:14px 12px; border:1px solid rgba(255,255,255,.1); border-right:none; border-radius:14px 0 0 14px;">
+              <input type="checkbox" class="rowCheck" name="ids" value="{{ p.id }}">
+            </td>
+            <td data-label="Loyiha" style="border-top:1px solid rgba(255,255,255,.1); border-bottom:1px solid rgba(255,255,255,.1);">
+              <div style="display:flex; gap:10px; align-items:center;">
+                {% if p.image %}<img src="{{ p.image.url }}" style="width:40px; height:30px; border-radius:6px; object-fit:cover;">{% endif %}
+                <div style="text-align:left;">
+                  <b style="display:block; font-size:14px;">{{ p.title|truncatechars:30 }}</b>
+                </div>
+              </div>
+            </td>
+            <td data-label="Muallif" style="border-top:1px solid rgba(255,255,255,.1); border-bottom:1px solid rgba(255,255,255,.1);">{{ p.author.username }}</td>
+            <td data-label="Status" style="border-top:1px solid rgba(255,255,255,.1); border-bottom:1px solid rgba(255,255,255,.1);">
+              <span style="font-size:11px; padding:3px 8px; border-radius:8px; background:rgba(0,212,255,0.1); color:#00d4ff; border:1px solid rgba(0,212,255,0.2);">{{ p.status }}</span>
+            </td>
+            <td data-label="Yaratilgan" style="border-top:1px solid rgba(255,255,255,.1); border-bottom:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,0.6);">{{ p.created_at|date:"H:i d.m.y" }}</td>
+            <td data-label="Yuborilgan" style="border-top:1px solid rgba(255,255,255,.1); border-bottom:1px solid rgba(255,255,255,.1);">{{ p.submitted_at|date:"H:i d.m.y"|default:"—" }}</td>
+            <td data-label="Review" style="border-top:1px solid rgba(255,255,255,.1); border-bottom:1px solid rgba(255,255,255,.1);">{{ p.reviewed_at|date:"H:i d.m.y"|default:"—" }}</td>
+            <td data-label="Publish" style="border-top:1px solid rgba(255,255,255,.1); border-bottom:1px solid rgba(255,255,255,.1);">{{ p.published_at|date:"H:i d.m.y"|default:"—" }}</td>
+            <td data-label="Boshqaruv" style="border:1px solid rgba(255,255,255,.1); border-left:none; border-radius:0 14px 14px 0;">
+              <a href="{% url 'superadmin_project_detail' p.id %}" style="color:#00d4ff; text-decoration:none; font-weight:bold;">Ochish</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="9" style="text-align:center; padding:30px; color:rgba(255,255,255,0.4);">Ma'lumot topilmadi.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</form>
+
+<script>
+    // Avvalgi JS mantiqingiz o'zgarishsiz qoladi, faqat UIga moslashadi.
+    const headAll = document.getElementById("selectAllHead");
+    const btnAll  = document.getElementById("selectAllBtn");
+    const countEl = document.getElementById("selectedCount");
+    const checks  = () => Array.from(document.querySelectorAll(".rowCheck"));
+
+    function updateCount(){
+      const n = checks().filter(c => c.checked).length;
+      countEl.textContent = n + " ta tanlandi";
+      if(headAll) headAll.checked = n > 0 && n === checks().length;
+    }
+
+    if(headAll) headAll.addEventListener("change", e => {
+      checks().forEach(c => c.checked = e.target.checked);
+      updateCount();
+    });
+
+    if(btnAll) btnAll.addEventListener("click", () => {
+      const anyUnchecked = checks().some(c => !c.checked);
+      checks().forEach(c => c.checked = anyUnchecked);
+      updateCount();
+    });
+
+    document.addEventListener("change", e => {
+      if(e.target.classList.contains("rowCheck")) updateCount();
+    });
+
+    function confirmBulkDelete(){
+      const n = checks().filter(c => c.checked).length;
+      if(!n) { alert("Hech narsa tanlanmadi"); return false; }
+      return confirm(n + " ta loyihani o‘chirmoqchimisiz?");
+    }
+
+    function closeToast(btn) {
+      const el = btn.closest('.toast');
+      el.style.opacity = "0";
+      setTimeout(() => el.remove(), 300);
+    }
+</script>
+{% endblock %}

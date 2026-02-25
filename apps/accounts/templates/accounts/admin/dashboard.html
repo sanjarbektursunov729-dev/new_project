@@ -1,0 +1,248 @@
+{% extends "accounts/admin/base_admin.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block nav_dash %}active{% endblock %}
+{% block crumb %} Admin • Dashboard{% endblock %}
+
+{% block content %}
+  <div class="dash-head">
+    <div>
+      <h1 class="dash-title">Dashboard</h1>
+      <div class="dash-sub">Loyihalaring holati va tezkor amallar.</div>
+    </div>
+    <a class="btn dash-cta" href="{% url 'admin_project_create' %}">+ Yangi loyiha</a>
+  </div>
+
+  <div class="stats-grid">
+
+  <!-- BARCHA LOYIHALAR -->
+  <div class="card stat">
+    <div class="stat-row">
+      <div>
+        <div class="stat-label">BARCHA LOYIHALAR</div>
+        <div class="stat-num">{{ stats.total }}</div>
+      </div>
+      <div class="stat-badge total">
+        <i class="fa-solid fa-layer-group"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- QORALAMA -->
+  <div class="card stat">
+    <div class="stat-row">
+      <div>
+        <div class="stat-label">QORALAMA</div>
+        <div class="stat-num">{{ stats.draft }}</div>
+      </div>
+      <div class="stat-badge draft">
+        <i class="fa-solid fa-pen"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- KUTILAYOTGAN -->
+  <div class="card stat">
+    <div class="stat-row">
+      <div>
+        <div class="stat-label">KUTILAYOTGAN</div>
+        <div class="stat-num">{{ stats.pending }}</div>
+      </div>
+      <div class="stat-badge pending">
+        <i class="fa-solid fa-hourglass-half"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- TASDIQLANGAN -->
+  <div class="card stat">
+    <div class="stat-row">
+      <div>
+        <div class="stat-label">TASDIQLANGAN</div>
+        <div class="stat-num">{{ stats.reviewed }}</div>
+      </div>
+      <div class="stat-badge reviewed">
+        <i class="fa-solid fa-check"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAD ETILGAN -->
+  <div class="card stat">
+    <div class="stat-row">
+      <div>
+        <div class="stat-label">RAD ETILGAN</div>
+        <div class="stat-num">{{ stats.rejected }}</div>
+      </div>
+      <div class="stat-badge rejected">
+        <i class="fa-solid fa-xmark"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHOP ETILGAN -->
+  <div class="card stat">
+    <div class="stat-row">
+      <div>
+        <div class="stat-label">CHOP ETILGAN</div>
+        <div class="stat-num">{{ stats.published }}</div>
+      </div>
+      <div class="stat-badge published">
+        <i class="fa-solid fa-rocket"></i>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+  <div class="dash-grid">
+    <div class="card">
+      <b class="card-title">Tezkor</b>
+      <div class="card-sub">Loyihalarni boshqarish.</div>
+      <div class="actions">
+        <a class="btn" href="{% url 'admin_project_list' %}">Mening loyihalarim</a>
+        <a class="btn2" href="{% url 'admin_project_create' %}">Yangi loyiha</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <b class="card-title">Eslatma</b>
+      <div class="status-note">
+
+  <div class="note-item draft">
+    <i class="fa-solid fa-pen"></i>
+    <div>
+      <strong>QORALAMA</strong>
+      <span>— Tekshiruvga yuborilmagan loyihalar.</span>
+    </div>
+  </div>
+
+  <div class="note-item pending">
+    <i class="fa-solid fa-hourglass-half"></i>
+    <div>
+      <strong>KUTILAYOTGAN</strong>
+      <span>— Tekshiruv navbatida turgan loyihalar.</span>
+    </div>
+  </div>
+
+  <div class="note-item reviewed">
+    <i class="fa-solid fa-check"></i>
+    <div>
+      <strong>TASDIQLANGAN</strong>
+      <span>— Tekshiruvdan muvaffaqiyatli o‘tgan loyihalar.</span>
+    </div>
+  </div>
+
+  <div class="note-item rejected">
+    <i class="fa-solid fa-xmark"></i>
+    <div>
+      <strong>RAD ETILGAN</strong>
+      <span>— Kamchiliklari sababli qaytarilgan loyihalar.</span>
+    </div>
+  </div>
+
+  <div class="note-item published">
+    <i class="fa-solid fa-rocket"></i>
+    <div>
+      <strong>CHOP ETILGAN</strong>
+      <span>— Muvaffaqiyatli tekshirilib, ommaga e'lon qilingan loyihalar.</span>
+    </div>
+  </div>
+
+</div>
+    </div>
+  </div>
+
+  <style>
+    /* Head */
+    .dash-head{
+      padding:16px 2px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .dash-title{margin:0; font-size:26px;}
+    .dash-sub{color:rgba(234,242,255,.62); font-size:13px; margin-top:6px;}
+
+    /* Stats */
+    .stats-grid{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:12px;
+    }
+    .stat-row{display:flex; justify-content:space-between; gap:10px; align-items:flex-start;}
+    .stat-label{color:rgba(234,242,255,.62); font-size:13px; font-weight:650;}
+    .stat-num{font-size:26px; font-weight:900; margin-top:6px;}
+    .stat-badge{
+      width:38px; height:38px;
+      border-radius:14px;
+      border:1px solid rgba(0,212,255,.20);
+      background: rgba(0,212,255,.10);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900;
+      flex:0 0 38px;
+    }
+
+    /* Lower grid */
+    .dash-grid{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns: 2fr 1fr;
+      gap:12px;
+    }
+    .card-title{font-size:14px;}
+    .card-sub{color:rgba(234,242,255,.62); font-size:13px; margin-top:6px;}
+    .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+    .note{color:rgba(234,242,255,.62); font-size:11px; margin-top:10px; line-height:1.7;}
+
+    /* Tablet */
+    @media (max-width: 1100px){
+      .stats-grid{grid-template-columns:repeat(2, 1fr);}
+      .dash-grid{grid-template-columns:1fr;}
+    }
+
+    /* Phone */
+    @media (max-width: 560px){
+      .dash-head{align-items:stretch;}
+      .dash-cta{width:100%; justify-content:center;}
+      .dash-title{font-size:22px;}
+      .stats-grid{grid-template-columns:1fr;}
+      .stat-num{font-size:24px;}
+      .actions a{width:100%; justify-content:center;}
+      .stat-badge{width:40px; height:40px; border-radius:16px;}
+    }
+
+    .status-note{
+  margin-top:14px;
+  padding:14px;
+  border-radius:16px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  display:grid;
+  gap:10px;
+}
+
+.note-item{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  font-size:13px;
+  color:rgba(234,242,255,.75);
+}
+
+.note-item i{
+  width:26px;
+  height:26px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  color:#fff;
+}
+
+
+  </style>
+{% endblock %}

@@ -1,0 +1,331 @@
+{% load static %}
+<html lang="uz">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Superadmin{% endblock %}</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root{
+      --bg:#070b14;
+      --panel:#0b1220;
+      --panel2:#0f1a2e;
+      --line:rgba(255,255,255,.10);
+      --line2:rgba(0,212,255,.20);
+      --text:#eaf2ff;
+      --muted:rgba(234,242,255,.62);
+      --cyan:#00d4ff;
+      --danger:#ef4444;
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --vio:#a78bfa;
+    }
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial;color:var(--text)}
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 700px at 18% 0%, rgba(0,212,255,.14), transparent 55%),
+        radial-gradient(900px 500px at 90% 30%, rgba(33,230,255,.10), transparent 55%),
+        linear-gradient(180deg, #060914, var(--bg));
+      min-height:100vh;
+    }
+    a{color:inherit;text-decoration:none}
+
+    .layout{display:flex; min-height:100vh;}
+    .sidebar{
+      width:280px; padding:22px 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border-right:1px solid var(--line);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      align-self: flex-start;
+      height: 100vh;
+      overflow:auto;
+    }
+
+    .brand{
+      display:flex; gap:10px; align-items:center;
+      padding:14px 14px; border:1px solid var(--line);
+      border-radius:16px; background: rgba(0,0,0,.18);
+      box-shadow: 0 12px 28px rgba(0,0,0,.25);
+      margin-bottom:18px;
+    }
+    .logo{
+      width:40px; height:40px; border-radius:12px;
+      background: radial-gradient(circle at 30% 30%, rgba(0,212,255,.9), rgba(0,212,255,.15));
+      border:1px solid var(--line2);
+      box-shadow: 0 0 20px rgba(0,212,255,.18);
+      flex:0 0 40px;
+    }
+    .brand b{display:block; font-size:14px}
+    .brand span{display:block; font-size:12px; color:var(--muted)}
+    .section-title{font-size:12px; letter-spacing: 2px; color:var(--muted); margin:18px 10px 10px;}
+
+    .nav a{
+      display:flex; align-items:center; gap:10px;
+      padding:12px 12px; border-radius:14px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.14);
+      margin:10px 0;
+      transition:.2s;
+    }
+    .nav a:hover{border-color:rgba(0,212,255,.35); box-shadow:0 0 0 3px rgba(0,212,255,.08) inset;}
+    .nav a.active{border-color:rgba(0,212,255,.45); background: rgba(0,212,255,.08);}
+
+    .logout{
+      margin-top:18px;
+      display:block;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(239,68,68,.35);
+      background: rgba(239,68,68,.08);
+      text-align:center;
+    }
+
+    .main{flex:1; padding:22px;}
+    .topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 16px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background: rgba(0,0,0,.16);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 14px 30px rgba(0,0,0,.22);
+  gap: 12px;
+
+  /* ✅ SILJIMAYDIGAN (sticky) */
+  position: sticky;
+  top: 22px;          /* .main padding:22px bo'lgani uchun */
+  z-index: 1000;
+}
+    .topbar .crumb{color:var(--muted); font-size:13px}
+
+    .userchip{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      min-width: 0;
+    }
+    .userchip .name{
+      font-size:13px; color:var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 320px;
+    }
+    .avatar{
+      width:30px;height:30px;border-radius:999px;
+      background: radial-gradient(circle at 30% 30%, rgba(0,212,255,.9), rgba(0,212,255,.18));
+      border:1px solid var(--line2);
+      flex: 0 0 30px;
+      display:flex;align-items:center;justify-content:center;font-size:14px;
+    }
+
+    .content{margin-top:18px;}
+    .card{
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.14);
+      border-radius:18px;
+      padding:14px;
+      box-shadow: 0 16px 34px rgba(0,0,0,.22);
+      backdrop-filter: blur(10px);
+    }
+
+    /* ============ MOBILE MENU ============ */
+    .hamburger{
+      display:none;
+      width:44px; height:44px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      cursor:pointer;
+      align-items:center;
+      justify-content:center;
+      flex: 0 0 44px;
+    }
+    .hamburger:hover{ border-color: rgba(0,212,255,.35); box-shadow:0 0 0 3px rgba(0,212,255,.08) inset; }
+
+    .mobile-brand{
+      display:none;
+      align-items:center;
+      gap:10px;
+      min-width: 0;
+    }
+    .mobile-brand b{
+      font-size:13px;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 48vw;
+      display:block;
+    }
+    .mobile-brand span{
+      display:block;
+      font-size:12px;
+      color: var(--muted);
+    }
+
+    .backdrop{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(4px);
+      display:none;
+      z-index: 9998;
+    }
+
+    /* offcanvas sidebar on mobile */
+    @media (max-width: 900px){
+      .main{padding:16px;}
+      .sidebar{
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        height: 100vh;
+        transform: translateX(-110%);
+        transition: transform .22s ease;
+        z-index: 9999;
+        width: min(320px, 88vw);
+        box-shadow: 18px 0 50px rgba(0,0,0,.45);
+      }
+      body.menu-open .sidebar{ transform: translateX(0); }
+      body.menu-open .backdrop{ display:block; }
+
+      .hamburger{ display:inline-flex; }
+      .mobile-brand{ display:flex; }
+      .topbar{
+        border-radius: 16px;
+        padding: 12px 12px;
+      }
+      .userchip .name{ max-width: 38vw; }
+    }
+
+    /* Tablet: content spacing */
+    @media (max-width: 620px){
+      .userchip{ padding: 8px 10px; }
+      .avatar{ width:28px; height:28px; flex-basis:28px; }
+    }
+
+    /* toast anim */
+    @keyframes toastIn{
+      from{opacity:0; transform: translateY(-6px) scale(.98);}
+      to{opacity:1; transform: translateY(0) scale(1);}
+    }
+    .toast-success{ border-color: rgba(34,197,94,.35) !important; }
+    .toast-success > div:first-child{ background: rgba(34,197,94,.95) !important; }
+
+    .toast-error{ border-color: rgba(239,68,68,.35) !important; }
+    .toast-error > div:first-child{ background: rgba(239,68,68,.95) !important; }
+
+    .toast-warning{ border-color: rgba(245,158,11,.35) !important; }
+    .toast-warning > div:first-child{ background: rgba(245,158,11,.95) !important; }
+
+    .toast-info{ border-color: rgba(0,212,255,.35) !important; }
+  </style>
+</head>
+
+<body>
+<div class="backdrop" onclick="document.body.classList.remove('menu-open')"></div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo" style="display:flex;align-items:center;justify-content:center;font-size:18px;">
+        <i class="fa-solid fa-robot"></i>
+      </div>
+      <div>
+        <b>
+          <i class="fa-solid fa-shield-halved" style="margin-right:6px;"></i>
+          SUPERADMIN PANEL
+        </b>
+        <span>Tekshiruv / Tasdiqlash</span>
+      </div>
+    </div>
+
+    <div class="section-title" style="color: var(--muted); letter-spacing: 2px; font-size: 12px; font-weight: normal;">BO‘LIMLAR</div>
+    <nav class="nav">
+      <a class="{% block nav_admins %}{% endblock %}" href="{% url 'superadmin_admin_list' %}">
+        <i class="fa-solid fa-users" style="width:18px;"></i>
+        ADMIN
+      </a>
+
+      <a class="{% block nav_pending %}{% endblock %}" href="{% url 'superadmin_pending_list' %}">
+        <i class="fa-solid fa-hourglass-half" style="width:18px;"></i>
+        TASDIQLASH
+      </a>
+
+      <a class="{% block nav_reviewed %}{% endblock %}" href="{% url 'superadmin_reviewed_list' %}">
+        <i class="fa-solid fa-magnifying-glass" style="width:18px;"></i>
+        TASDIQLANGAN
+      </a>
+
+      <a class="{% block nav_published %}{% endblock %}" href="{% url 'superadmin_published_list' %}">
+        <i class="fa-solid fa-check-circle" style="width:18px;"></i>
+        YUKLANGAN
+      </a>
+
+      <a class="{% block nav_allprojects %}{% endblock %}" href="{% url 'superadmin_projects_all' %}">
+        <i class="fa-solid fa-layer-group" style="width:18px;"></i>
+        Barcha loyihalar
+      </a>
+    </nav>
+
+    <a class="logout" href="{% url 'logout' %}">
+      <i class="fa-solid fa-right-from-bracket"></i> Chiqish
+    </a>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <!-- Mobile hamburger + brand -->
+      <button class="hamburger" type="button" aria-label="Menyu" onclick="toggleMenu()">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <div style="min-width:0; flex:1;">
+        <div class="crumb">{% block crumb %}Boshqaruv paneli{% endblock %}</div>
+
+        <div class="mobile-brand">
+          <b>Superadmin Panel</b>
+          <span style="display:none"></span>
+        </div>
+      </div>
+
+      <div class="userchip" title="{{ request.user.get_full_name|default:request.user.username }}">
+        <div class="avatar">
+          <i class="fa-solid fa-user-shield"></i>
+        </div>
+        <div class="name">
+          {{ request.user.get_full_name|default:request.user.username }}
+        </div>
+      </div>
+    </div>
+
+
+    <div class="content">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+
+<script>
+  function toggleMenu(){
+    document.body.classList.toggle('menu-open');
+  }
+  // menyudan link bosilganda mobil menyu yopilsin
+  document.querySelectorAll('.sidebar .nav a, .sidebar .logout').forEach(a=>{
+    a.addEventListener('click', ()=> document.body.classList.remove('menu-open'));
+  });
+  // ESC bosilsa yopilsin
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape') document.body.classList.remove('menu-open');
+  });
+</script>
+</body>
+</html>

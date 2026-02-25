@@ -1,0 +1,348 @@
+{% extends "accounts/admin/base_admin.html" %}
+
+{% block title %}Loyiha • {{ project.title }}{% endblock %}
+{% block nav_projects %}active{% endblock %}
+{% block crumb %}Kichik admin • Loyiha • Batafsil{% endblock %}
+
+{% block content %}
+  <div class="phead">
+    <div>
+      <h1 class="ptitle">{{ project.title }}</h1>
+      <div class="psub">
+        Loyiha ma’lumotlari. Tahrirlash faqat 'QORALAMA' yoki 'RAD ETILGAN' bo‘lsa.
+      </div>
+
+      <div class="pmeta">
+        {% if project.status == "DRAFT" %}
+          <span class="pill pill-draft">QORALAMA</span>
+        {% elif project.status == "PENDING" %}
+          <span class="pill pill-pend">KUTILAYOTGAN</span>
+        {% elif project.status == "REVIEWED" %}
+          <span class="pill pill-rev">TEKSHIRILGAN</span>
+        {% elif project.status == "REJECTED" %}
+          <span class="pill pill-rej">RAD ETILGAN</span>
+        {% else %}
+          <span class="pill pill-pub">CHOP ETILGAN</span>
+        {% endif %}
+        <span class="muted">Yangilangan: {{ project.updated_at|date:"H:i d-m-Y" }}</span>
+      </div>
+    </div>
+
+    <div class="pactions">
+      <a class="btn2" href="{% url 'admin_project_list' %}">Orqaga</a>
+
+      {% if project.status == "DRAFT" or project.status == "REJECTED" %}
+        <a class="btn2" href="{% url 'admin_project_edit' project.id %}">Tahrirlash</a>
+
+        <form method="post" action="{% url 'admin_project_submit' project.id %}">
+          {% csrf_token %}
+          <button class="btn2" type="submit">Tekshiruvga yuborish</button>
+        </form>
+
+        <form method="post" action="{% url 'admin_project_delete' project.id %}" onsubmit="return confirm('O‘chirasizmi?');">
+          {% csrf_token %}
+          <button class="btn2 btn-danger" type="submit">O‘chirish</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <!-- ===== LEFT: CONTENT ===== -->
+      <div class="left">
+        <div class="block">
+          <div class="lbl">Qisqacha izoh</div>
+          <div class="box">{{ project.short_desc|default:"—" }}</div>
+        </div>
+
+        <div class="block">
+          <div class="lbl">Batafsil ma’lumot</div>
+          <div class="box prose">{{ project.content|linebreaksbr }}</div>
+        </div>
+
+        <div class="two">
+          <div class="block">
+            <div class="lbl">YouTube</div>
+            {% if project.youtube_url %}
+              <a class="link" href="{{ project.youtube_url }}" target="_blank" rel="noopener">Videoni ochish</a>
+            {% else %}
+              <div class="muted">—</div>
+            {% endif %}
+          </div>
+
+          <div class="block">
+            <div class="lbl">ZIP</div>
+            {% if project.code_zip %}
+              <a class="link" href="{{ project.code_zip.url }}" target="_blank" rel="noopener">ZIP yuklab olish</a>
+            {% else %}
+              <div class="muted">—</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="lbl">Dasturiy muhit</div>
+
+          {% if project.show_code and project.coding_env_note %}
+  <div class="code-wrap" style="margin-top:12px;">
+    <div class="code-head">
+      <div class="code-env">
+        <i class="fa-solid fa-code"></i>
+        Kod / Muhit
+      </div>
+
+      <button type="button" class="copy-btn" onclick="copyExtraCode(this)">
+        <i class="fa-regular fa-copy"></i> Copy
+      </button>
+    </div>
+
+    <pre class="code-box"><code>{{ project.coding_env_note }}</code></pre>
+  </div>
+{% endif %}
+        </div>
+
+        {# Superadmin izohi / status xabarlari #}
+        {% if project.review_note %}
+          {% if project.status == "REJECTED" %}
+            <div class="note note-rej">
+              <b>Superadmin izohi (Rad etildi):</b>
+              <div class="note-txt" style="white-space:pre-wrap;">{{ project.review_note }}</div>
+            </div>
+          {% elif project.status == "REVIEWED" %}
+            <div class="note note-ok">
+              <b>Superadmin izohi (Tasdiqlandi):</b>
+              <div class="note-txt" style="white-space:pre-wrap;">{{ project.review_note }}</div>
+            </div>
+          {% endif %}
+        {% endif %}
+
+        {% if project.status == "PENDING" %}
+          <div class="note note-warn">
+            <b>Habar:</b> Loyiha tekshiruvda.
+          </div>
+        {% elif project.status == "REVIEWED" and not project.review_note %}
+          <div class="note note-ok">
+            <b>Habar:</b> Loyiha tasdiqlandi.
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- ===== RIGHT: PREVIEW ===== -->
+      <aside class="right">
+        <b class="pv-title">Preview</b>
+        <div class="pv-sub">Rasm va asosiy meta.</div>
+
+        {% if project.image %}
+          <img src="{{ project.image.url }}" class="pv-img" alt="">
+        {% else %}
+          <div class="pv-empty">Rasm yo‘q.</div>
+        {% endif %}
+
+      </aside>
+    </div>
+  </div>
+
+  <style>
+    .phead{
+      display:flex; align-items:flex-end; justify-content:space-between;
+      gap:12px; flex-wrap:wrap; padding:16px 2px;
+    }
+    .ptitle{margin:0; font-size:26px;}
+    .psub{color:rgba(234,242,255,.62); font-size:13px; margin-top:6px; line-height:1.55;}
+    .pmeta{margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    .muted{color:rgba(234,242,255,.62); font-size:12px;}
+
+    .pactions{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    .pactions form{margin:0;}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:14px;
+      align-items:start;
+    }
+
+    .lbl{color:rgba(234,242,255,.62); font-size:13px; margin:10px 0 6px;}
+    .box{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      line-height:1.65;
+      word-break: break-word;
+    }
+    .prose{white-space:normal;}
+    .two{display:grid; grid-template-columns: 1fr 1fr; gap:12px;}
+    .link{
+      display:inline-flex;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(0,212,255,.30);
+      background: rgba(0,212,255,.08);
+      color:#bff6ff;
+      text-decoration:none;
+      width: fit-content;
+    }
+    .link:hover{filter:brightness(1.08);}
+
+    /* Pills */
+    .pill{
+      display:inline-flex;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+    }
+    .pill-draft{border-color: rgba(167,139,250,.35); background: rgba(167,139,250,.10); color:#e4d7ff;}
+    .pill-pend{border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.10); color:#ffd7a0;}
+    .pill-rev {border-color: rgba(34,197,94,.35);  background: rgba(34,197,94,.10);  color:#9ef0c0;}
+    .pill-rej {border-color: rgba(239,68,68,.35);  background: rgba(239,68,68,.10);  color:#ffb4b4;}
+    .pill-pub {border-color: rgba(34,197,94,.35);  background: rgba(34,197,94,.10);  color:#9ef0c0;}
+
+    /* Notes */
+    .note{
+      margin-top:12px;
+      padding:10px 12px;
+      border-radius:14px;
+      font-size:13px;
+      line-height:1.55;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+    }
+    .note-rej{border-color: rgba(239,68,68,.25); background: rgba(239,68,68,.08); color:#ffd1d1;}
+    .note-ok {border-color: rgba(34,197,94,.25);  background: rgba(34,197,94,.08);  color:#c8ffe0;}
+    .note-warn{border-color: rgba(245,158,11,.25); background: rgba(245,158,11,.08); color:#ffe2b8;}
+    .note-txt{margin-top:6px;}
+
+    /* Right preview */
+    .right{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      border-radius:18px;
+      padding:14px;
+      position: sticky;
+      top: 96px;
+      max-height: calc(100vh - 120px);
+      overflow:auto;
+    }
+    .pv-title{font-size:14px;}
+    .pv-sub{color:rgba(234,242,255,.62); font-size:13px; margin-top:6px; line-height:1.55;}
+    .pv-img{
+      width:100%;
+      aspect-ratio:16/10;
+      object-fit:cover;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      margin-top:12px;
+      display:block;
+    }
+    .pv-empty{color:rgba(234,242,255,.62); font-size:13px; margin-top:12px;}
+    .pv-tip{color:rgba(234,242,255,.62); font-size:13px; margin-top:12px; line-height:1.6;}
+
+    @media (max-width: 1100px){
+      .grid{grid-template-columns: 1fr;}
+      .right{position: static; max-height:none; overflow:visible;}
+      .two{grid-template-columns: 1fr;}
+    }
+    @media (max-width: 560px){
+      .ptitle{font-size:22px;}
+      .pactions a, .pactions button{width:100%; justify-content:center;}
+      .pactions form{width:100%;}
+      .pactions form button{width:100%;}
+    }
+
+    .code-wrap{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.code-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  background: rgba(0,0,0,.18);
+}
+
+.code-env{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight: 800;
+  font-size: 13px;
+  color: rgba(234,242,255,.90);
+}
+
+.copy-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,212,255,.30);
+  background: rgba(0,212,255,.08);
+  color: #bff6ff;
+  cursor: pointer;
+  transition: .2s;
+  font-weight: 700;
+  font-size: 12px;
+}
+.copy-btn:hover{ filter: brightness(1.1); transform: translateY(-1px); }
+.copy-btn:active{ transform: translateY(0); }
+
+.code-box{
+  margin:0;
+  padding: 14px;
+  background: rgba(8,16,24,.45);
+  color: #eaf2ff;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow:auto;
+  max-height: 360px;
+  white-space: pre-wrap;   /* uzun matn bo'lsa satrga tushadi */
+  word-break: break-word;
+}
+
+.code-box code{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+  </style>
+    <script>
+async function copyExtraCode(btn){
+  const wrap = btn.closest('.code-wrap');
+  if(!wrap) return;
+
+  const codeEl = wrap.querySelector('.code-box code');
+  const text = (codeEl?.innerText || codeEl?.textContent || "").trim();
+  if(!text) return;
+
+  try{
+    await navigator.clipboard.writeText(text);
+    const old = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied';
+    btn.disabled = true;
+    setTimeout(() => { btn.innerHTML = old; btn.disabled = false; }, 1200);
+  }catch(e){
+    // fallback
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+
+    const old = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied';
+    btn.disabled = true;
+    setTimeout(() => { btn.innerHTML = old; btn.disabled = false; }, 1200);
+  }
+}
+</script>
+{% endblock %}

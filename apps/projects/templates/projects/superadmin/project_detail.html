@@ -1,0 +1,668 @@
+{% extends "accounts/superadmin/base_superadmin.html" %}
+
+{% block title %}Loyiha{% endblock %}
+{% block nav_allprojects %}active{% endblock %}
+{% block crumb %}Superadmin • Loyiha batafsil{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+  <div id="toast-wrap" class="toast-wrap" aria-live="polite">
+    {% for message in messages %}
+      {% if 'as' in message.tags %}
+        <div class="toast
+          {% if 'success' in message.tags %}toast-success
+          {% elif 'error' in message.tags %}toast-error
+          {% elif 'warning' in message.tags %}toast-warning
+          {% else %}toast-info
+          {% endif %}">
+
+          <div class="toast-dot"></div>
+
+          <div class="toast-icon">
+            {% if 'success' in message.tags %}<i class="fa-solid fa-circle-check"></i>
+            {% elif 'error' in message.tags %}<i class="fa-solid fa-circle-xmark"></i>
+            {% elif 'warning' in message.tags %}<i class="fa-solid fa-triangle-exclamation"></i>
+            {% else %}<i class="fa-solid fa-circle-info"></i>{% endif %}
+          </div>
+
+          <div class="toast-text">{{ message }}</div>
+
+          <button type="button" class="toast-close" onclick="closeToast(this)">×</button>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <style>
+    .toast-wrap { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; width: min(400px, calc(100vw - 40px)); pointer-events: none; }
+    .toast { pointer-events: auto; display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.4); animation: toastIn 0.3s ease forwards; }
+    .toast-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex: 0 0 8px; }
+    .toast-icon { margin-top: 1px; font-size: 18px; }
+    .toast-text { font-size: 14px; line-height: 1.4; color: #f8fafc; flex: 1; word-break: break-word; }
+    .toast-close { background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 20px; line-height: 1; padding: 0 4px; margin-left: 8px; transition: 0.2s; }
+    .toast-close:hover { color: #fff; }
+
+    .toast-success { border-color: rgba(34, 197, 94, 0.4); }
+    .toast-success .toast-dot { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    .toast-success .toast-icon { color: #22c55e; }
+
+    .toast-error { border-color: rgba(239, 68, 68, 0.4); }
+    .toast-error .toast-dot { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+    .toast-error .toast-icon { color: #ef4444; }
+
+    .toast-warning { border-color: rgba(245, 158, 11, 0.4); }
+    .toast-warning .toast-dot { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+    .toast-warning .toast-icon { color: #f59e0b; }
+
+    .toast-info { border-color: rgba(59, 130, 246, 0.4); }
+    .toast-info .toast-dot { background: #3b82f6; box-shadow: 0 0 8px #3b82f6; }
+    .toast-info .toast-icon { color: #3b82f6; }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+  </style>
+
+  <script>
+    function closeToast(btn) {
+      const el = btn.closest('.toast');
+      if (!el) return;
+      el.style.transition = "all 0.3s ease";
+      el.style.opacity = "0";
+      el.style.transform = "translateX(20px)";
+      setTimeout(() => el.remove(), 300);
+    }
+
+    setTimeout(() => {
+      document.querySelectorAll('.toast').forEach((el, i) => {
+        setTimeout(() => {
+          const btn = el.querySelector('.toast-close');
+          if(btn) closeToast(btn);
+        }, i * 300);
+      });
+    }, 4000);
+  </script>
+{% endif %}
+
+<!-- ===================== -->
+<!-- RESPONSIVE STYLE -->
+<!-- ===================== -->
+<style>
+  .p-head{
+    padding:16px 2px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+
+  /* Desktop: 2 ustun (chap rasm, o‘ng info) */
+  .p-shell{
+    display:grid;
+    grid-template-columns: 420px 1fr;
+    gap:14px;
+    align-items:start;
+  }
+
+  .p-left, .p-right{
+    min-width: 0;
+  }
+
+  .p-image{
+    width:100%;
+    aspect-ratio: 16/10;
+    object-fit: cover;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.03);
+  }
+
+  .p-card{
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:18px;
+    padding:14px;
+    background: rgba(255,255,255,.03);
+  }
+
+  .p-grid2{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:12px;
+  }
+
+  .p-muted{
+    color:rgba(234,242,255,.62);
+    font-size:13px;
+    line-height:1.9;
+  }
+
+  .p-section{ margin-top:14px; }
+  .p-section b{ display:block; }
+
+  /* Planshet: chap ustun kichrayadi */
+  @media (max-width: 1100px){
+    .p-shell{ grid-template-columns: 360px 1fr; }
+  }
+
+  /* Planshet: timeline/qo‘shimcha 1 ustun bo‘ladi */
+  @media (max-width: 900px){
+    .p-shell{ grid-template-columns: 1fr; }
+    .p-grid2{ grid-template-columns: 1fr; }
+    .p-image{ aspect-ratio: 16/9; }
+  }
+
+  /* Telefon: padding va sarlavha moslashadi */
+  @media (max-width: 520px){
+    .p-head h1{ font-size: 22px !important; }
+    .p-head{ padding: 12px 2px; }
+    .p-card{ padding: 12px; }
+  }
+
+  .p-code-wrap {
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    padding: 12px;
+  }
+  .p-code-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .p-code-tag {
+    font-size: 13px;
+    font-weight: 800;
+    color: #00d4ff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+  }
+  .p-copy-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .p-copy-btn:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: #00d4ff;
+  }
+  .p-code-box {
+    background: #070b14;
+    padding: 15px;
+    border-radius: 12px;
+    overflow: auto;
+    margin: 0;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    max-height: 400px;
+  }
+  .p-code-box code {
+    font-family: 'Fira Code', 'Consolas', monospace;
+    color: #9ef0ff;
+    font-size: 13.5px;
+    line-height: 1.6;
+    white-space: pre;
+  }
+
+  /* Asosiy konteyner sozlamalari */
+  .p-right { display: flex; flex-direction: column; gap: 20px; }
+
+  /* Card va Sectionlar uchun umumiy stil */
+  .p-card, .p-section {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 16px;
+    transition: 0.3s;
+  }
+
+  /* Grid (Timeline va Note yonma-yon) */
+  .p-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+  /* Sarlavhalar */
+  .p-card-title, .p-sec-head {
+    font-size: 14px;
+    font-weight: 800;
+    color: #00d4ff;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Timeline stil */
+  .p-timeline-mini { display: flex; flex-direction: column; gap: 6px; }
+  .t-row {
+    display: flex; justify-content: space-between; font-size: 13px;
+    padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .t-row span { color: rgba(234, 242, 255, 0.5); }
+  .t-row b { color: rgba(234, 242, 255, 0.9); }
+  .t-row.active b { color: #00d4ff; }
+
+  /* Review Izoh matni */
+  .p-note-content {
+    font-size: 14px;
+    color: rgba(234, 242, 255, 0.85);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 12px;
+    border-radius: 12px;
+    min-height: 60px;
+  }
+
+  /* Section Body */
+  .p-sec-body {
+    color: rgba(234, 242, 255, 0.85);
+    line-height: 1.8;
+    font-size: 15px;
+  }
+  .pre-line { white-space: pre-wrap; }
+
+  /* Kod qismi dizayni */
+  .p-code-wrap { background: #070b14; border-radius: 14px; overflow: hidden; border: 1px solid rgba(0, 212, 255, 0.2); }
+  .p-code-head {
+    padding: 10px 15px; background: rgba(0, 212, 255, 0.05);
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .p-code-box { padding: 15px; margin: 0; max-height: 350px; overflow: auto; }
+  .p-code-box code { font-family: 'Fira Code', monospace; color: #9ef0ff; font-size: 13px; }
+
+  .p-copy-btn {
+    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1);
+    color: #fff; padding: 4px 10px; border-radius: 8px; cursor: pointer; font-size: 11px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .p-grid2 { grid-template-columns: 1fr; }
+  }
+
+  /* Qo'shimchalar bloki uchun maxsus dizayn */
+  .p-extra-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .p-extra-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .p-extra-label {
+    font-size: 12px;
+    color: rgba(234, 242, 255, 0.5);
+    font-weight: 600;
+  }
+
+  .p-btn-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    transition: 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* YouTube tugmasi */
+  .p-btn-link.yt {
+    background: rgba(0, 212, 255, 0.1);
+    color: #00d4ff;
+    border-color: rgba(0, 212, 255, 0.2);
+  }
+
+
+  /* ZIP tugmasi */
+  .p-btn-link.zip {
+    background: rgba(0, 212, 255, 0.1);
+    color: #00d4ff;
+    border-color: rgba(0, 212, 255, 0.2);
+  }
+
+
+  .p-no-data {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.2);
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    text-align: center;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+  }
+
+  .p-header-main {
+    padding: 2px 0;
+    margin-bottom: 2px;
+  }
+
+  .p-main-title {
+    margin: 0;
+    font-size: 26px;
+    color: #fff;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+
+  .p-meta-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* Status Pill */
+  .p-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 13px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(234, 242, 255, 0.8);
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #94a3b8;
+  }
+
+  /* Statusga qarab ranglar (Djangodagi status nomlariga moslang) */
+  .p-status-pill.published { color: #00ff88; border-color: rgba(0, 255, 136, 0.2); background: rgba(0, 255, 136, 0.05); }
+  .p-status-pill.published .status-dot { background: #00ff88; box-shadow: 0 0 8px #00ff88; }
+
+  .p-status-pill.pending { color: #f59e0b; border-color: rgba(245, 158, 11, 0.2); background: rgba(245, 158, 11, 0.05); }
+  .p-status-pill.pending .status-dot { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+
+  /* Muallif bloki */
+  .p-author-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 212, 255, 0.05);
+    padding: 4px 12px 4px 6px;
+    border-radius: 50px;
+    border: 1px solid rgba(0, 212, 255, 0.2);
+  }
+
+  .p-avatar {
+    width: 23px;
+    height: 23px;
+    border-radius: 50%;
+    background: #00d4ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: #0b1220;
+    font-size: 14px;
+  }
+
+  .p-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .p-author-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #eaf2ff;
+  }
+
+  .p-sep {
+    color: rgba(255, 255, 255, 0.1);
+    font-weight: 300;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .p-main-title { font-size: 24px; }
+    .p-meta-info { gap: 10px; }
+    .p-sep { display: none; }
+  }
+
+  .p-action-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  /* Umumiy tugma stili */
+  .p-btn-back, .p-btn-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+
+  /* Orqaga tugmasi (Ghost style) */
+  .p-btn-back {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(234, 242, 255, 0.7);
+  }
+
+  /* Tahrirlash tugmasi (Accent style) */
+  .p-btn-edit {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    color: #00d4ff;
+  }
+
+
+
+  /* Ikonkalar uchun kichik stil */
+  .p-btn-back i, .p-btn-edit i {
+    font-size: 16px;
+  }
+
+  /* Mobil qurilmalar uchun */
+  @media (max-width: 480px) {
+    .p-action-group {
+      width: 100%;
+    }
+    .p-btn-back, .p-btn-edit {
+      flex: 1; /* Tugmalar teng kenglikda bo'ladi */
+      justify-content: center;
+      padding: 14px;
+    }
+  }
+</style>
+
+<div class="p-head">
+  <div class="p-header-main">
+  <div class="p-title-block">
+    <h1 class="p-main-title">{{ p.title }}</h1>
+
+    <div class="p-meta-info">
+      <div class="p-status-pill {{ p.status|lower }}">
+        <span class="status-dot"></span>
+        Status: <b>{{ p.get_status_display|default:p.status }}</b>
+      </div>
+
+      <span class="p-sep">|</span>
+
+      <div class="p-author-pill">
+        <div class="p-avatar">
+          {% if p.author and p.author.profile.image %}
+            <img src="{{ p.author.profile.image.url }}" alt="">
+          {% else %}
+            <i class="fa-solid fa-user-ninja"></i>
+          {% endif %}
+        </div>
+        <span class="p-author-name">
+          {% if p.author %}
+            {{ p.author.get_full_name|default:p.author.username }}
+          {% else %}
+            {{ p.author_name|default:"Muallif o‘chirilgan" }}
+          {% endif %}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="p-action-group">
+  <a href="{% url 'superadmin_projects_all' %}" class="p-btn-back">
+    <i class="fa-solid fa-arrow-left"></i>
+    <span>Orqaga</span>
+  </a>
+
+  <a href="{% url 'superadmin_project_edit' p.id %}" class="p-btn-edit">
+    <i class="fa-solid fa-pen-to-square"></i>
+    <span>Tahrirlash</span>
+  </a>
+</div>
+</div>
+
+<div class="card">
+  <div class="p-shell">
+
+    <!-- LEFT: rasm -->
+    <div class="p-left">
+      {% if p.image %}
+        <img src="{{ p.image.url }}" class="p-image" alt="{{ p.title }}">
+      {% else %}
+        <div class="p-card" style="text-align:center; padding:18px;">
+          <div style="opacity:.85; font-weight:800;">Rasm yo‘q</div>
+          <div class="p-muted" style="margin-top:6px;">Ushbu loyihaga rasm biriktirilmagan.</div>
+        </div>
+      {% endif %}
+
+      <!-- Chap tomonda kichik blok (xohlasang qoldiramiz) -->
+      <div class="p-card extra-card" style="margin-top:12px;">
+  <div class="p-card-title"><i class="fa-solid fa-paperclip"></i> Qo‘shimchalar</div>
+
+  <div class="p-extra-grid" style="margin-top:12px;">
+    {# YouTube Link #}
+    <div class="p-extra-item">
+      <span class="p-extra-label">Video darslik:</span>
+      {% if p.youtube_url %}
+        <a href="{{ p.youtube_url }}" target="_blank" class="p-btn-link yt">
+          <i class="fa-brands fa-youtube"></i> YouTube orqali ochish
+        </a>
+      {% else %}
+        <div class="p-no-data">Mavjud emas</div>
+      {% endif %}
+    </div>
+
+    {# ZIP File #}
+    <div class="p-extra-item">
+      <span class="p-extra-label">Loyiha fayllari:</span>
+      {% if p.code_zip %}
+        <a href="{{ p.code_zip.url }}" target="_blank" class="p-btn-link zip" download>
+          <i class="fa-solid fa-file-zipper"></i> ZIP Yuklab olish
+        </a>
+      {% else %}
+        <div class="p-no-data">Mavjud emas</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+    </div>
+
+    <!-- RIGHT: ma’lumotlar -->
+    <div class="p-right">
+
+  {# 1. TIMELINE VA REVIEW IZOH GRIDI #}
+  <div class="p-grid2">
+    <div class="p-card timeline-card">
+      <div class="p-card-title"><i class="fa-solid fa-clock-rotate-left"></i> Timeline</div>
+      <div class="p-timeline-mini">
+        <div class="t-row"><span>Yaratilgan:</span> <b>{{ p.created_at|date:"H:i d-m-Y" }}</b></div>
+        <div class="t-row"><span>Yuborilgan:</span> <b>{{ p.submitted_at|date:"H:i d-m-Y" }}</b></div>
+        {% if p.submitted_at %}<div class="t-row"><span>Review:</span> <b>{{ p.reviewed_at|date:"H:i d-m-Y" }}</b></div>{% endif %}
+        {% if p.reviewed_at %}<div class="t-row"><span>Published:</span> <b>{{ p.published_at|date:"H:i d-m-Y" }}</b></div>{% endif %}
+        {% if p.published_at %}<div class="t-row active"><span>Yangilangan:</span> <b>{{ p.updated_at|date:"H:i d-m-Y" }}</b></div>{% endif %}
+      </div>
+    </div>
+
+    <div class="p-card note-card">
+      <div class="p-card-title"><i class="fa-solid fa-comment-dots"></i> Review izoh</div>
+      <div class="p-note-content">
+        {% if p.review_note %}
+          {{ p.review_note }}
+        {% else %}
+          <span class="p-muted">— Izoh yo'q —</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# 2. QISQACHA IZOH SECTION #}
+  <div class="p-section info-sec">
+    <div class="p-sec-head">Qisqacha izoh</div>
+    <div class="p-sec-body">
+      {{ p.short_desc|default:"Izoh kiritilmagan." }}
+    </div>
+  </div>
+
+  {# 3. BATAFSIL MA'LUMOT SECTION #}
+  <div class="p-section info-sec">
+    <div class="p-sec-head">Batafsil ma’lumot</div>
+    <div class="p-sec-body pre-line">
+      {{ p.content|default:"Ma'lumot mavjud emas." }}
+    </div>
+  </div>
+
+  {# 4. KOD QISMI #}
+  {% if p.coding_env_note %}
+  <div class="p-section code-sec">
+    <div class="p-code-wrap">
+      <div class="p-code-head">
+        <span class="p-code-tag"><i class="fa-solid fa-terminal"></i> Environment / Code</span>
+        <button type="button" class="p-copy-btn" onclick="copyDetailCode(this)">
+          <i class="fa-regular fa-copy"></i> Copy
+        </button>
+      </div>
+      <pre class="p-code-box"><code>{{ p.coding_env_note }}</code></pre>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+  </div>
+</div>
+    <script>
+  function copyDetailCode(btn) {
+    const code = btn.closest('.p-code-wrap').querySelector('code').innerText;
+    navigator.clipboard.writeText(code).then(() => {
+      const original = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied';
+      setTimeout(() => btn.innerHTML = original, 2000);
+    });
+  }
+</script>
+
+{% endblock %}

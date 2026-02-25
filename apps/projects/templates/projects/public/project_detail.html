@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ project.title }} | Robo & AI Lab</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --bg: #070b14;
+      --card-bg: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.1);
+      --accent: #00d4ff;
+      --text: #ffffff;
+      --muted: rgba(255, 255, 255, 0.6);
+      --gradient: radial-gradient(1200px 700px at 18% 0%, rgba(0, 212, 255, 0.14), transparent 55%);
+    }
+
+    *{ box-sizing:border-box; }
+
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      background-image: var(--gradient);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 18px;
+    }
+
+    /* ===== Header ===== */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(7,11,20,.78), rgba(7,11,20,.35));
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      margin-bottom: 18px;
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: .3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .logo-dot {
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 16px rgba(0,212,255,.55);
+      flex: 0 0 12px;
+    }
+
+    .badge {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--muted);
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      white-space: nowrap;
+    }
+
+    .nav-tools { display: flex; gap: 10px; align-items:center; }
+
+    /* ===== Layout ===== */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 18px;
+      align-items: start;
+      padding-bottom: 26px;
+    }
+
+    /* Content Card */
+    .project-content {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 22px;
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .project-img {
+      width: 100%;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      margin-bottom: 16px;
+      background: rgba(255,255,255,.03);
+    }
+
+    .project-title {
+      font-size: 34px;
+      margin: 0 0 10px 0;
+      font-weight: 900;
+      letter-spacing: .2px;
+      line-height: 1.15;
+    }
+
+    .project-desc {
+      font-size: 15px;
+      color: var(--muted);
+      margin: 0 0 16px;
+    }
+
+    .full-text {
+      border-top: 1px solid rgba(255,255,255,.10);
+      padding-top: 14px;
+      color: #d1d5db;
+    }
+
+    /* Right Panel */
+    .side-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 22px;
+      height: fit-content;
+      position: sticky;
+      top: 78px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      padding: 14px 10px;
+      border-radius: 14px;
+      text-align: center;
+    }
+    .stat-box span {
+      display: block;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--accent);
+    }
+    .stat-box small { color: var(--muted); font-size: 11px; }
+
+    /* Buttons */
+    .action-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .btn {
+      padding: 12px 16px;
+      border-radius: 14px;
+      text-decoration: none;
+      font-weight: 750;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: 0.2s;
+      border: 1px solid rgba(255,255,255,.10);
+      white-space: nowrap;
+    }
+
+    .btn-zip { background: rgba(0,212,255,.90); color: #001018; border-color: rgba(0,212,255,.45); }
+    .btn-youtube { background: rgba(255, 0, 0, 0.14); color: #ff4d4d; border-color: rgba(255, 0, 0, 0.28); }
+
+    .btn:hover { transform: translateY(-2px); opacity: 0.92; }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 980px) {
+      .main-layout { grid-template-columns: 1fr; }
+      .side-panel { position: static; top: auto; }
+    }
+
+    @media (max-width: 640px) {
+      .container { padding: 14px; }
+      .project-content, .side-panel { padding: 16px; border-radius: 20px; }
+      .project-title { font-size: 26px; }
+      .stats-grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+      .btn { width: 100%; justify-content: center; }
+      .nav-tools { display:none; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="navbar">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      Robo & AI Lab
+    </div>
+
+    <div class="nav-tools">
+      <span class="badge"><i class="fa-solid fa-moon"></i> Tun/Kun</span>
+      <span class="badge"><i class="fa-solid fa-link"></i> API</span>
+    </div>
+  </div>
+
+  <div class="main-layout">
+
+    <div class="project-content">
+      {% if project.show_image and project.image %}
+        <img src="{{ project.image.url }}" class="project-img" alt="Loyiha rasmi">
+      {% endif %}
+
+      {% if project.show_title %}
+        <h1 class="project-title">{{ project.title }}</h1>
+      {% endif %}
+
+      {% if project.show_short_desc %}
+        <p class="project-desc">{{ project.short_desc }}</p>
+      {% endif %}
+
+      {% if project.show_content %}
+        <div class="full-text">
+          {{ project.content|linebreaks }}
+        </div>
+      {% endif %}
+
+      <div class="action-btns">
+        {% if project.show_youtube and project.youtube_url %}
+          <a href="{{ project.youtube_url }}" class="btn btn-youtube" target="_blank" rel="noopener">
+            <i class="fa-brands fa-youtube"></i> YouTube videoni ko‘rish
+          </a>
+        {% endif %}
+
+        {% if project.show_zip and project.code_zip %}
+          <a href="{{ project.code_zip.url }}" class="btn btn-zip">
+            <i class="fa-solid fa-file-zipper"></i> ZIP yuklash
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="side-panel">
+      <h3 style="margin:0;">Tezkor ko‘rsatkich</h3>
+
+      <div class="stats-grid">
+        <div class="stat-box"><span>3</span><small>Jami loyiha</small></div>
+        <div class="stat-box"><span>1</span><small>AI</small></div>
+        <div class="stat-box"><span>1</span><small>Robot</small></div>
+      </div>
+
+      <p class="muted" style="margin: 0;">
+        <i class="fa-solid fa-circle-info"></i>
+        Ushbu loyiha avtomatik ravishda tizimdan yuklandi.
+      </p>
+
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:14px;">
+        <span class="badge" style="justify-content:center;">Holati: <b style="color:#00ff88; margin-left:6px;">Tayyor</b></span>
+        <span class="badge" style="justify-content:center;">Sana: {{ project.created_at|date:"d.m.Y" }}</span>
+      </div>
+
+      <!-- “Barcha loyihalarga qaytish” olib tashlandi -->
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

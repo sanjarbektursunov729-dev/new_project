@@ -1,0 +1,450 @@
+{% extends "accounts/admin/base_admin.html" %}
+
+{% block title %}Mening loyihalarim{% endblock %}
+{% block nav_projects %}active{% endblock %}
+{% block crumb %}Admin • Loyihalarim{% endblock %}
+
+{% block content %}
+
+{# ===================== TOAST (faqat sb tag) ===================== #}
+{% if messages %}
+  <div id="toast-wrap" class="toast-wrap" aria-live="polite">
+    {% for message in messages %}
+      {% if 'ad' in message.tags %}
+        <div class="toast
+          {% if 'success' in message.tags %}toast-success
+          {% elif 'error' in message.tags %}toast-error
+          {% elif 'warning' in message.tags %}toast-warning
+          {% else %}toast-info
+          {% endif %}">
+          <div class="toast-dot"></div>
+
+          <div class="toast-icon">
+            {% if 'success' in message.tags %}<i class="fa-solid fa-circle-check"></i>
+            {% elif 'error' in message.tags %}<i class="fa-solid fa-circle-xmark"></i>
+            {% elif 'warning' in message.tags %}<i class="fa-solid fa-triangle-exclamation"></i>
+            {% else %}<i class="fa-solid fa-circle-info"></i>{% endif %}
+          </div>
+
+          <div class="toast-text">{{ message }}</div>
+
+          <button type="button" class="toast-close" onclick="closeToast(this)">×</button>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <style>
+    .toast-wrap { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; width: min(400px, calc(100vw - 40px)); pointer-events: none; }
+    .toast { pointer-events: auto; display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.4); animation: toastIn 0.3s ease forwards; }
+    .toast-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex: 0 0 8px; }
+    .toast-icon { margin-top: 1px; font-size: 18px; }
+    .toast-text { font-size: 14px; line-height: 1.4; color: #f8fafc; flex: 1; word-break: break-word; }
+    .toast-close { background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 20px; line-height: 1; padding: 0 4px; margin-left: 8px; transition: 0.2s; }
+    .toast-close:hover { color: #fff; }
+
+    .toast-success { border-color: rgba(34, 197, 94, 0.4); }
+    .toast-success .toast-dot { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    .toast-success .toast-icon { color: #22c55e; }
+
+    .toast-error { border-color: rgba(239, 68, 68, 0.4); }
+    .toast-error .toast-dot { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+    .toast-error .toast-icon { color: #ef4444; }
+
+    .toast-warning { border-color: rgba(245, 158, 11, 0.4); }
+    .toast-warning .toast-dot { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+    .toast-warning .toast-icon { color: #f59e0b; }
+
+    .toast-info { border-color: rgba(59, 130, 246, 0.4); }
+    .toast-info .toast-dot { background: #3b82f6; box-shadow: 0 0 8px #3b82f6; }
+    .toast-info .toast-icon { color: #3b82f6; }
+
+    @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+    @media (max-width: 520px){
+      .toast-wrap{ top: 12px; right: 12px; width: calc(100vw - 24px); }
+      .toast{ border-radius: 14px; }
+    }
+  </style>
+
+  <script>
+    function closeToast(btn) {
+      const el = btn.closest('.toast');
+      if (!el) return;
+      el.style.transition = "all 0.3s ease";
+      el.style.opacity = "0";
+      el.style.transform = "translateX(20px)";
+      setTimeout(() => el.remove(), 300);
+    }
+    setTimeout(() => {
+      document.querySelectorAll('.toast').forEach((el, i) => {
+        setTimeout(() => {
+          const btn = el.querySelector('.toast-close');
+          if(btn) closeToast(btn);
+        }, i * 300);
+      });
+    }, 4000);
+  </script>
+{% endif %}
+
+
+  <div class="plist-head">
+    <div>
+      <h1 class="plist-title">Mening loyihalarim</h1>
+    </div>
+    <a class="btn plist-cta" href="{% url 'admin_project_create' %}">+ Yangi loyiha</a>
+  </div>
+
+  <!-- ===== Desktop / Tablet table (>= 860px) ===== -->
+  <div class="card plist-table">
+    <div class="table-wrap">
+      <table class="t">
+        <thead>
+          <tr>
+            <th>Loyiha</th>
+            <th>Status</th>
+            <th>Yangilangan</th>
+            <th>Amallar</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for p in projects %}
+            <tr class="row">
+              <td class="cell cell-left">
+                <div class="proj">
+                  {% if p.image %}
+                    <img src="{{ p.image.url }}" class="thumb" alt="">
+                  {% else %}
+                    <div class="thumb thumb-empty"></div>
+                  {% endif %}
+
+                  <div class="proj-meta">
+                    <b class="proj-title">{{ p.title }}</b>
+
+                    <div class="proj-desc">
+                      {{ p.short_desc }}
+                    </div>
+
+                    {# ===== HABARLAR (kichik admin ko'radi) ===== #}
+                    {% if p.review_note %}
+                      {% if p.status == "REJECTED" %}
+                        <div class="note-box note-rej">
+                          <b>Superadmin izohi (Rad etildi):</b> <span style="white-space:pre-wrap;">{{ p.review_note }}</span>
+                        </div>
+                      {% elif p.status == "REVIEWED" %}
+                        <div class="note-box note-ok">
+                          <b>Superadmin izohi (Tasdiqlandi):</b> <span style="white-space:pre-wrap;">{{ p.review_note }}</span>
+                        </div>
+                      {% endif %}
+                    {% endif %}
+
+                    {% if p.status == "PENDING" %}
+                      <div class="note-box note-warn">
+                        <b>Habar:</b> Loyiha tekshiruvda.
+                      </div>
+                    {% elif p.status == "REVIEWED" and not p.review_note %}
+                      <div class="note-box note-ok">
+                        <b>Habar:</b> Loyiha tasdiqlandi.
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+
+              <td class="cell cell-mid">
+                {% if p.status == "DRAFT" %}
+                  <span class="pill pill-draft">QORALAMA</span>
+                {% elif p.status == "PENDING" %}
+                  <span class="pill pill-pend">KUTILAYOTGAN</span>
+                {% elif p.status == "REVIEWED" %}
+                  <span class="pill pill-rev">TASDIQLANGAN</span>
+                {% elif p.status == "REJECTED" %}
+                  <span class="pill pill-rej">RAD ETILGAN</span>
+                {% else %}
+                  <span class="pill pill-pub">CHOP ETILGAN</span>
+                {% endif %}
+              </td>
+
+              <td class="cell cell-mid muted">
+                {{ p.updated_at|date:"H:i d-m-Y" }}
+              </td>
+
+              <td class="cell cell-right">
+                <div class="acts">
+  {# DOIMIY: Ochish #}
+  {# Agar detail sahifang bo'lsa: #}
+  <a class="btn2" href="{% url 'admin_project_detail' p.id %}">Ochish</a>
+
+  {# Agar detail YO'Q bo'lsa, vaqtincha editga ulab tur: #}
+  {# <a class="btn2" href="{% url 'admin_project_edit' p.id %}">Ochish</a> #}
+
+  {% if p.status == "DRAFT" or p.status == "REJECTED" %}
+    <a class="btn2" href="{% url 'admin_project_edit' p.id %}">Tahrirlash</a>
+
+    <form method="post" action="{% url 'admin_project_submit' p.id %}">
+      {% csrf_token %}
+      <button class="btn2" type="submit">Tekshiruvga yuborish</button>
+    </form>
+
+    <form method="post" action="{% url 'admin_project_delete' p.id %}" onsubmit="return confirm('O‘chirasizmi?');">
+      {% csrf_token %}
+      <button class="btn2 btn-danger" type="submit">O‘chirish</button>
+    </form>
+  {% endif %}
+</div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4" class="empty">Hali loyiha yo‘q.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== Phone cards (< 860px) ===== -->
+  <div class="plist-cards">
+    {% for p in projects %}
+      <div class="card pcard">
+        <div class="pcard-top">
+          <div class="pcard-left">
+            {% if p.image %}
+              <img src="{{ p.image.url }}" class="thumb thumb-lg" alt="">
+            {% else %}
+              <div class="thumb thumb-lg thumb-empty"></div>
+            {% endif %}
+          </div>
+
+          <div class="pcard-main">
+            <div class="pcard-title">{{ p.title }}</div>
+            <div class="pcard-desc">{{ p.short_desc }}</div>
+
+            <div class="pcard-row">
+              <div class="pcard-pill">
+                {% if p.status == "DRAFT" %}
+                  <span class="pill pill-draft">DRAFT</span>
+                {% elif p.status == "PENDING" %}
+                  <span class="pill pill-pend">PENDING</span>
+                {% elif p.status == "REVIEWED" %}
+                  <span class="pill pill-rev">REVIEWED</span>
+                {% elif p.status == "REJECTED" %}
+                  <span class="pill pill-rej">REJECTED</span>
+                {% else %}
+                  <span class="pill pill-pub">PUBLISHED</span>
+                {% endif %}
+              </div>
+
+              <div class="pcard-date muted">
+                {{ p.updated_at|date:"Y-m-d H:i" }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {# notes on mobile #}
+        {% if p.review_note %}
+          {% if p.status == "REJECTED" %}
+            <div class="note-box note-rej">
+              <b>Superadmin izohi (Rad etildi):</b> <span style="white-space:pre-wrap;">{{ p.review_note }}</span>
+            </div>
+          {% elif p.status == "REVIEWED" %}
+            <div class="note-box note-ok">
+              <b>Superadmin izohi (Tasdiqlandi):</b> <span style="white-space:pre-wrap;">{{ p.review_note }}</span>
+            </div>
+          {% endif %}
+        {% endif %}
+
+        {% if p.status == "PENDING" %}
+          <div class="note-box note-warn">
+            <b>Habar:</b> Loyiha tekshiruvda. Superadmin ko‘rib chiqmoqda.
+          </div>
+        {% elif p.status == "REVIEWED" and not p.review_note %}
+          <div class="note-box note-ok">
+            <b>Habar:</b> Loyiha tasdiqlandi. (Publish bosqichiga tayyor)
+          </div>
+        {% endif %}
+
+        <div class="pcard-acts">
+  {# DOIMIY: Ochish #}
+  <a class="btn2 w100" href="{% url 'admin_project_detail' p.id %}">Ochish</a>
+
+  {# detail YO'Q bo'lsa: #}
+  {# <a class="btn2 w100" href="{% url 'admin_project_edit' p.id %}">Ochish</a> #}
+
+  {% if p.status == "DRAFT" or p.status == "REJECTED" %}
+    <a class="btn2 w100" href="{% url 'admin_project_edit' p.id %}">Tahrirlash</a>
+
+    <form method="post" action="{% url 'admin_project_submit' p.id %}" class="w100">
+      {% csrf_token %}
+      <button class="btn2 w100" type="submit">Tekshiruvga yuborish</button>
+    </form>
+
+    <form method="post" action="{% url 'admin_project_delete' p.id %}" onsubmit="return confirm('O‘chirasizmi?');" class="w100">
+      {% csrf_token %}
+      <button class="btn2 btn-danger w100" type="submit">O‘chirish</button>
+    </form>
+  {% endif %}
+</div>
+      </div>
+    {% empty %}
+      <div class="card empty-card">Hali loyiha yo‘q.</div>
+    {% endfor %}
+  </div>
+
+  <style>
+    /* ===== Header ===== */
+    .plist-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      padding:16px 2px;
+    }
+    .plist-title{margin:0; font-size:26px;}
+    .plist-sub{color:rgba(234,242,255,.62); font-size:13px; margin-top:6px;}
+    .plist-cta{white-space:nowrap;}
+
+    /* ===== Table ===== */
+    .table-wrap{overflow:auto;}
+    .t{width:100%; border-collapse:separate; border-spacing:0 10px; min-width: 860px;}
+    .t th{
+      text-align:left;
+      font-size:12px;
+      color:rgba(234,242,255,.62);
+      padding:8px 12px;
+      font-weight:700;
+    }
+    .row{background: rgba(255,255,255,.04);}
+    .cell{
+      padding:14px 12px;
+      border-top:1px solid rgba(255,255,255,.10);
+      border-bottom:1px solid rgba(255,255,255,.10);
+      vertical-align:top;
+    }
+    .cell-left{
+      border-left:1px solid rgba(255,255,255,.10);
+      border-top-left-radius:16px;
+      border-bottom-left-radius:16px;
+    }
+    .cell-right{
+      border-right:1px solid rgba(255,255,255,.10);
+      border-top-right-radius:16px;
+      border-bottom-right-radius:16px;
+    }
+    .cell-mid{ }
+    .muted{color:rgba(234,242,255,.62);}
+
+    .proj{display:flex; gap:10px;}
+    .thumb{
+      width:56px; height:42px;
+      border-radius:12px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,.10);
+      flex:0 0 auto;
+    }
+    .thumb-empty{background: rgba(255,255,255,.06);}
+    .proj-meta{min-width: 320px;}
+    .proj-title{display:block;}
+    .proj-desc{
+      color:rgba(234,242,255,.62);
+      font-size:12px;
+      margin-top:6px;
+      line-height:1.4;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+
+    .pill{
+      display:inline-flex;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+    }
+    .pill-draft{border-color: rgba(167,139,250,.35); background: rgba(167,139,250,.10); color:#e4d7ff;}
+    .pill-pend{border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.10); color:#ffd7a0;}
+    .pill-rev {border-color: rgba(34,197,94,.35);  background: rgba(34,197,94,.10);  color:#9ef0c0;}
+    .pill-rej {border-color: rgba(239,68,68,.35);  background: rgba(239,68,68,.10);  color:#ffb4b4;}
+    .pill-pub {border-color: rgba(34,197,94,.35);  background: rgba(34,197,94,.10);  color:#9ef0c0;}
+
+    .acts{display:flex; gap:10px; flex-wrap:wrap;}
+    .dash{
+      display:inline-flex;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      color:rgba(234,242,255,.62);
+      font-size:12px;
+      height: fit-content;
+    }
+    .empty{padding:18px; color:rgba(234,242,255,.62); border:none;}
+
+    /* Notes */
+    .note-box{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      font-size:13px;
+      line-height:1.55;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+    }
+    .note-rej{border-color: rgba(239,68,68,.25); background: rgba(239,68,68,.08); color:#ffd1d1;}
+    .note-ok {border-color: rgba(34,197,94,.25);  background: rgba(34,197,94,.08);  color:#c8ffe0;}
+    .note-warn{border-color: rgba(245,158,11,.25); background: rgba(245,158,11,.08); color:#ffe2b8;}
+
+    /* ===== Mobile cards ===== */
+    .plist-cards{display:none; gap:12px; margin-top:12px;}
+    .pcard{padding:14px;}
+    .pcard-top{display:flex; gap:12px; align-items:flex-start;}
+    .thumb-lg{width:72px; height:56px; border-radius:14px;}
+    .pcard-title{font-weight:900; font-size:15px; line-height:1.3;}
+    .pcard-desc{
+      color:rgba(234,242,255,.62);
+      font-size:12px;
+      margin-top:6px;
+      line-height:1.45;
+      display:-webkit-box;
+      -webkit-line-clamp:3;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+    .pcard-row{
+      margin-top:10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .pcard-date{font-size:12px;}
+    .pcard-acts{
+      margin-top:12px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .w100{width:100%;}
+    .empty-card{color:rgba(234,242,255,.62); padding:16px;}
+
+    /* Breakpoints */
+    @media (max-width: 980px){
+      .proj-meta{min-width: 260px;}
+      .t{min-width: 820px;}
+    }
+
+    /* Switch to cards on phone/tablet small */
+    @media (max-width: 860px){
+      .plist-table{display:none;}
+      .plist-cards{display:grid;}
+      .plist-cta{width:100%; justify-content:center;}
+      .plist-title{font-size:22px;}
+    }
+  </style>
+{% endblock %}

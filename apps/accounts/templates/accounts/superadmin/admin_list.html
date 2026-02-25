@@ -1,0 +1,392 @@
+{% extends "accounts/superadmin/base_superadmin.html" %}
+
+{% block title %}Adminlar{% endblock %}
+{% block nav_admins %}active{% endblock %}
+{% block crumb %}Superadmin • Adminlar{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+  <div id="toast-wrap" class="toast-wrap" aria-live="polite" aria-atomic="true">
+    {% for message in messages %}
+      {% if 'sa' in message.tags %}
+        <div class="toast
+          {% if 'success' in message.tags %}toast-success
+          {% elif 'error' in message.tags %}toast-error
+          {% elif 'warning' in message.tags %}toast-warning
+          {% else %}toast-info
+          {% endif %}">
+          <div class="toast-dot" aria-hidden="true"></div>
+
+          <div class="toast-icon" aria-hidden="true">
+            {% if 'success' in message.tags %}
+              <i class="fa-solid fa-circle-check"></i>
+            {% elif 'error' in message.tags %}
+              <i class="fa-solid fa-circle-xmark"></i>
+            {% elif 'warning' in message.tags %}
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            {% else %}
+              <i class="fa-solid fa-circle-info"></i>
+            {% endif %}
+          </div>
+
+          <div class="toast-text">{{ message }}</div>
+
+          <button type="button" class="toast-close" aria-label="Yopish" onclick="closeToast(this)">×</button>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <style>
+    .toast-wrap{
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: min(440px, calc(100vw - 28px));
+      pointer-events: none;
+    }
+    .toast{
+      pointer-events: auto;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(10,16,24,.82);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      animation: toastIn .22s ease;
+    }
+    .toast-dot{
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      margin-top: 6px;
+      background: rgba(0,212,255,.9);
+      flex: 0 0 10px;
+    }
+    .toast-icon{
+      margin-top: 2px;
+      font-size: 18px;
+      line-height: 1;
+      opacity: .95;
+    }
+    .toast-text{
+      font-size: 13px;
+      line-height: 1.55;
+      color: rgba(234,242,255,.92);
+      word-break: break-word;
+      flex: 1;
+      min-width: 0;
+    }
+    .toast-close{
+      margin-left: auto;
+      background: transparent;
+      border: none;
+      color: rgba(234,242,255,.65);
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      padding: 0 2px;
+    }
+    .toast-close:hover{ color: rgba(234,242,255,.9); }
+
+    .toast-success{ border-color: rgba(34,197,94,.35) !important; }
+    .toast-success .toast-dot{ background: rgba(34,197,94,.95) !important; }
+    .toast-success .toast-icon{ color: rgba(34,197,94,.95) !important; }
+
+    .toast-error{ border-color: rgba(239,68,68,.35) !important; }
+    .toast-error .toast-dot{ background: rgba(239,68,68,.95) !important; }
+    .toast-error .toast-icon{ color: rgba(239,68,68,.95) !important; }
+
+    .toast-warning{ border-color: rgba(245,158,11,.35) !important; }
+    .toast-warning .toast-dot{ background: rgba(245,158,11,.95) !important; }
+    .toast-warning .toast-icon{ color: rgba(245,158,11,.95) !important; }
+
+    .toast-info{ border-color: rgba(0,212,255,.35) !important; }
+    .toast-info .toast-dot{ background: rgba(0,212,255,.95) !important; }
+    .toast-info .toast-icon{ color: rgba(0,212,255,.95) !important; }
+
+    @keyframes toastIn{
+      from{ opacity:0; transform: translateY(-6px) scale(.98); }
+      to{ opacity:1; transform: translateY(0) scale(1); }
+    }
+
+    @media (max-width: 600px){
+      .toast-wrap{
+        top: 12px;
+        right: 12px;
+        width: calc(100vw - 24px);
+      }
+      .toast{ border-radius: 14px; }
+    }
+  </style>
+
+  <script>
+    function closeToast(btn){
+      const el = btn.closest('.toast');
+      if(!el) return;
+      el.style.transition = "opacity .28s, transform .28s";
+      el.style.opacity = "0";
+      el.style.transform = "translateY(-6px)";
+      setTimeout(() => el.remove(), 300);
+    }
+
+    // avtomatik yo‘qolish
+    setTimeout(() => {
+      const wrap = document.getElementById("toast-wrap");
+      if(!wrap) return;
+      [...wrap.children].forEach((el, i) => {
+        setTimeout(() => {
+          el.style.transition = "opacity .35s, transform .35s";
+          el.style.opacity = "0";
+          el.style.transform = "translateY(-6px)";
+          setTimeout(() => el.remove(), 380);
+        }, 2600 + i*220);
+      });
+    }, 700);
+  </script>
+{% endif %}
+
+
+<style>
+  .pagehead{
+    display:flex; align-items:flex-end; justify-content:space-between;
+    gap:12px; flex-wrap:wrap; padding:16px 2px;
+  }
+  .pagehead h1{margin:0; font-size:26px;}
+  .pagehead .sub{color:rgba(234,242,255,.62); font-size:13px; margin-top:6px;}
+
+  .btn-add{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:12px 14px;
+    border-radius:16px;
+    border:1px solid rgba(0,212,255,.40);
+    background: rgba(0,212,255,.10);
+    white-space:nowrap;
+  }
+
+  .tablewrap{overflow:auto; -webkit-overflow-scrolling:touch;}
+  .admin-table{width:100%; border-collapse:separate; border-spacing:0 10px; min-width: 820px;}
+  .admin-table th{
+    text-align:left; font-size:12px; color:rgba(234,242,255,.62);
+    padding:8px 12px;
+  }
+  .admin-table td{vertical-align:middle;}
+  .pill{
+    padding:6px 10px;border-radius:999px;font-size:12px;
+    border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04);
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .pill.ok{border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.10); color:#9ef0c0;}
+  .pill.bad{border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.10); color:#ffb4b4;}
+
+  .btn{
+    padding:10px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.12); cursor:pointer;
+  }
+  .btn-danger{
+    padding:10px 12px;border-radius:14px;border:1px solid rgba(239,68,68,.35);
+    background: rgba(239,68,68,.10); cursor:pointer;
+  }
+
+  .admin-cards{display:none; gap:12px; flex-direction:column;}
+  .admin-card{
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.04);
+    border-radius:18px;
+    padding:14px;
+  }
+  .admin-card .row{display:flex; justify-content:space-between; gap:10px; margin-top:10px;}
+  .admin-card .label{font-size:12px; color: rgba(234,242,255,.62);}
+  .admin-card .val{font-size:13px;}
+  .admin-card .top{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+  }
+  .admin-card .name{font-weight:900; font-size:15px; line-height:1.2;}
+  .admin-card .uname{
+    margin-top:6px; font-size:12px; color: rgba(234,242,255,.62);
+    word-break: break-word;
+  }
+  .admin-card .actions{
+    display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;
+  }
+
+  @media (max-width: 900px){
+    .pagehead h1{font-size:22px;}
+  }
+  @media (max-width: 720px){
+    .tablewrap{display:none;}
+    .admin-cards{display:flex;}
+    .btn-add{width:100%;}
+  }
+</style>
+
+<div class="pagehead">
+  <div>
+    <h1>Adminlar</h1>
+    <div class="sub">Yaratish / bloklash / ochish / o‘chirish</div>
+  </div>
+  <a class="btn-add" href="{% url 'superadmin_admin_create' %}">
+    <i class="fa-solid fa-user-plus"></i>
+    Yangi admin
+  </a>
+</div>
+
+{# created_creds blokini ishlatmayotgan bo'lsangiz, o'chirsa ham bo'ladi #}
+{% if created_creds %}
+  <div class="card" style="
+      border:1px solid rgba(0,212,255,.35);
+      background: rgba(0,212,255,.08);
+      margin-bottom:14px;
+      padding:16px;">
+    <div style="display:flex; gap:12px; justify-content:space-between; align-items:flex-start; flex-wrap:wrap;">
+      <div>
+        <div style="font-weight:900; font-size:14px;">
+          Yangi admin yaratildi: <span style="color:rgba(234,242,255,.92)">{{ created_creds.name }}</span>
+        </div>
+        <div style="color:rgba(234,242,255,.62); font-size:13px; margin-top:6px;">
+          Bu blok sahifa yangilanmaguncha turadi.
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn" type="button" onclick="copyText('{{ created_creds.username }}')">
+          <i class="fa-regular fa-copy"></i> Login copy
+        </button>
+        <button class="btn" type="button" onclick="copyText('{{ created_creds.password }}')">
+          <i class="fa-regular fa-copy"></i> Parol copy
+        </button>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+      <div class="pill" style="border-color: rgba(0,212,255,.25);">
+        <b style="color:rgba(234,242,255,.85); margin-right:6px;">Login:</b>
+        <code style="background:rgba(255,255,255,.08);padding:2px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.10);">
+          {{ created_creds.username }}
+        </code>
+      </div>
+
+      <div class="pill" style="border-color: rgba(245,158,11,.25);">
+        <b style="color:rgba(234,242,255,.85); margin-right:6px;">Parol:</b>
+        <code style="background:rgba(255,255,255,.08);padding:2px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.10);">
+          {{ created_creds.password }}
+        </code>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function copyText(txt){
+      navigator.clipboard.writeText(txt).then(() => {
+        // xohlasangiz shu yerda kichik toast ham chiqaramiz
+      });
+    }
+  </script>
+{% endif %}
+
+<!-- Desktop / tablet -->
+<div class="card tablewrap">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Ism Familiya</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Holat</th>
+        <th>Amallar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in admins %}
+        <tr style="background: rgba(255,255,255,.04);">
+          <td style="padding:14px 12px; border:1px solid rgba(255,255,255,.10); border-right:none; border-top-left-radius:16px;border-bottom-left-radius:16px;">
+            {{ u.first_name }} {{ u.last_name }}
+          </td>
+          <td style="padding:14px 12px; border-top:1px solid rgba(255,255,255,.10); border-bottom:1px solid rgba(255,255,255,.10);">
+            {{ u.username }}
+          </td>
+          <td style="padding:14px 12px; border-top:1px solid rgba(255,255,255,.10); border-bottom:1px solid rgba(255,255,255,.10);">
+            {{ u.email|default:"-" }}
+          </td>
+          <td style="padding:14px 12px; border-top:1px solid rgba(255,255,255,.10); border-bottom:1px solid rgba(255,255,255,.10);">
+            {% if u.is_active %}
+              <span class="pill ok">ACTIVE</span>
+            {% else %}
+              <span class="pill bad">BLOCKED</span>
+            {% endif %}
+          </td>
+          <td style="padding:14px 12px; border:1px solid rgba(255,255,255,.10); border-left:none; border-top-right-radius:16px;border-bottom-right-radius:16px;">
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <form method="post" action="{% url 'superadmin_admin_toggle' u.id %}">
+                {% csrf_token %}
+                <button class="btn" type="submit">
+                  {% if u.is_active %}Bloklash{% else %}Ochish{% endif %}
+                </button>
+              </form>
+
+              <form method="post" action="{% url 'superadmin_admin_delete' u.id %}"
+                    onsubmit="return confirm('Rostdan ham o‘chirasizmi?');">
+                {% csrf_token %}
+                <button class="btn-danger" type="submit">O‘chirish</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" style="padding:18px; color:rgba(234,242,255,.62); border:none;">Hozircha adminlar yo‘q.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Mobile -->
+<div class="admin-cards">
+  {% for u in admins %}
+    <div class="admin-card">
+      <div class="top">
+        <div style="min-width:0;">
+          <div class="name">{{ u.first_name }} {{ u.last_name }}</div>
+          <div class="uname">@{{ u.username }}</div>
+        </div>
+        <div>
+          {% if u.is_active %}
+            <span class="pill ok">ACTIVE</span>
+          {% else %}
+            <span class="pill bad">BLOCKED</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">Email</div>
+        <div class="val" style="text-align:right; word-break:break-word;">{{ u.email|default:"-" }}</div>
+      </div>
+
+      <div class="actions">
+        <form method="post" action="{% url 'superadmin_admin_toggle' u.id %}">
+          {% csrf_token %}
+          <button class="btn" type="submit">
+            {% if u.is_active %}Bloklash{% else %}Ochish{% endif %}
+          </button>
+        </form>
+
+        <form method="post" action="{% url 'superadmin_admin_delete' u.id %}"
+              onsubmit="return confirm('Rostdan ham o‘chirasizmi?');">
+          {% csrf_token %}
+          <button class="btn-danger" type="submit">O‘chirish</button>
+        </form>
+      </div>
+    </div>
+  {% empty %}
+    <div class="card" style="color:rgba(234,242,255,.62);">Hozircha adminlar yo‘q.</div>
+  {% endfor %}
+</div>
+
+{% endblock %}

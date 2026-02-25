@@ -1,0 +1,218 @@
+{% extends "accounts/admin/base_admin.html" %}
+
+{% block title %}Loyiha{% endblock %}
+{% block nav_create %}active{% endblock %}
+{% block crumb %}Admin • Loyiha{% endblock %}
+
+{% block content %}
+  <div class="pform-head">
+    <div>
+      <h1 class="pform-title">
+        {% if mode == "create" %}Yangi loyiha{% else %}Loyihani tahrirlash{% endif %}
+      </h1>
+      <div class="pform-sub">
+        Majburiy: rasm, nom, qisqacha izoh, batafsil ma’lumot. Ixtiyoriy: YouTube, ZIP, kod muhiti.
+      </div>
+    </div>
+    <a class="btn2 pform-back" href="{% url 'admin_project_list' %}">Orqaga</a>
+  </div>
+
+  {% if form.errors %}
+    <div class="card errbox">
+      <b>Xatolik:</b> forma to‘g‘ri to‘ldirilmagan. Pastdagi maydonlarni tekshiring.
+    </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="pform-grid">
+      <!-- ===== FORM ===== -->
+      <div class="pform-left">
+        <form method="post" enctype="multipart/form-data" class="pform">
+          {% csrf_token %}
+
+          <label class="lbl">Rasm (majburiy)</label>
+          {{ form.image }}
+
+          <label class="lbl">Nomi (majburiy)</label>
+          {{ form.title }}
+
+          <label class="lbl">Qisqacha izoh (majburiy)</label>
+          {{ form.short_desc }}
+
+          <label class="lbl">Batafsil ma’lumot (majburiy)</label>
+          {{ form.content }}
+
+          <label class="lbl">YouTube link (ixtiyoriy)</label>
+          {{ form.youtube_url }}
+
+          <label class="lbl">ZIP kod (ixtiyoriy)</label>
+          {{ form.code_zip }}
+
+          <label class="lbl">Kod yozish muhiti (ixtiyoriy)</label>
+          {{ form.coding_env_note }}
+
+          <div class="pform-actions">
+            <button class="btn" type="submit">Saqlash</button>
+            <a class="btn2" href="{% url 'admin_project_list' %}">Bekor</a>
+          </div>
+        </form>
+      </div>
+
+      <!-- ===== PREVIEW ===== -->
+      <aside class="pform-right">
+        <b class="pv-title">Preview</b>
+        <div class="pv-sub">Rasm tanlasang shu yerda ko‘rinadi.</div>
+
+        {% if mode == "edit" and project.image %}
+          <img src="{{ project.image.url }}" class="pv-img" alt="">
+        {% else %}
+          <img id="imgPrev" src="" class="pv-img" style="display:none" alt="">
+          <div id="imgEmpty" class="pv-empty">Hozircha rasm yo‘q.</div>
+        {% endif %}
+
+        <div class="pv-tip">
+          <b>Tip:</b> YouTube link va ZIP qo‘ysang, user detail’da chiqadi.
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <style>
+    /* ===== Head ===== */
+    .pform-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      padding:16px 2px;
+    }
+    .pform-title{margin:0; font-size:26px;}
+    .pform-sub{color:rgba(234,242,255,.62); font-size:13px; margin-top:6px; line-height:1.55;}
+    .pform-back{white-space:nowrap;}
+
+    /* ===== Error box ===== */
+    .errbox{
+      border:1px solid rgba(239,68,68,.25);
+      background: rgba(239,68,68,.08);
+      margin-bottom:14px;
+      color:#ffd1d1;
+    }
+
+    /* ===== Grid ===== */
+    .pform-grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:14px;
+
+      /* ✅ scroll bo'lsin, menuga ta'sir qilmasin */
+      align-items:start;
+    }
+
+    /* ===== Form controls ===== */
+    .lbl{
+      display:block;
+      color:rgba(234,242,255,.62);
+      font-size:13px;
+      margin:10px 0 6px;
+    }
+    /* formdagi input/textarea/selectlar */
+    .pform input,
+    .pform textarea,
+    .pform select{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      outline:none;
+      margin:0;
+    }
+    .pform input:focus,
+    .pform textarea:focus,
+    .pform select:focus{
+      border-color: rgba(0,212,255,.40);
+      box-shadow:0 0 0 3px rgba(0,212,255,.08);
+    }
+    .pform textarea{resize:vertical; min-height:160px;}
+    .pform input[type="file"]{padding:10px;}
+
+    .pform-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    /* ===== Preview box ===== */
+    .pform-right{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      border-radius:18px;
+      padding:14px;
+
+      /* ✅ preview scroll: uzun kontent bo'lsa ham */
+      position: sticky;
+      top: 96px; /* topbar sticky bo'lgani uchun */
+      max-height: calc(100vh - 120px);
+      overflow:auto;
+    }
+    .pv-title{font-size:14px;}
+    .pv-sub{color:rgba(234,242,255,.62); font-size:13px; margin-top:6px; line-height:1.55;}
+    .pv-img{
+      width:100%;
+      aspect-ratio:16/10;
+      object-fit:cover;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      margin-top:12px;
+      display:block;
+    }
+    .pv-empty{color:rgba(234,242,255,.62); font-size:13px; margin-top:12px;}
+    .pv-tip{color:rgba(234,242,255,.62); font-size:13px; margin-top:12px; line-height:1.6;}
+
+    /* ===== TABLET ===== */
+    @media (max-width: 1100px){
+      .pform-grid{grid-template-columns: 1fr;}
+      .pform-right{
+        position: static;  /* tablet/phone’da sticky shart emas */
+        max-height: none;
+        overflow: visible;
+      }
+    }
+
+    /* ===== PHONE ===== */
+    @media (max-width: 560px){
+      .pform-title{font-size:22px;}
+      .pform-back{width:100%; justify-content:center;}
+      .pform-actions a,
+      .pform-actions button{width:100%; justify-content:center;}
+    }
+
+    /* ===== Scrolllar menuga ta'sir qilmasligi uchun =====
+       - Biz body scrollni o‘zgartirmadik.
+       - Sidebar (drawer) ochilganda base template JS body.no-scroll beradi, bu normal.
+       - Shu sahifada alohida global overflow o‘zgartirish YO‘Q. */
+  </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const fileInput = document.querySelector('input[type="file"][name="image"]');
+  const imgPrev = document.getElementById("imgPrev");
+  const imgEmpty = document.getElementById("imgEmpty");
+
+  if (fileInput) {
+    fileInput.addEventListener("change", (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const url = URL.createObjectURL(f);
+      if (imgPrev) {
+        imgPrev.src = url;
+        imgPrev.style.display = "block";
+      }
+      if (imgEmpty) imgEmpty.style.display = "none";
+    });
+  }
+</script>
+{% endblock %}

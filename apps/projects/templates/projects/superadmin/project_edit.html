@@ -1,0 +1,154 @@
+{% extends "accounts/superadmin/base_superadmin.html" %}
+
+{% block title %}Tahrirlash • {{ p.title }}{% endblock %}
+{% block nav_allprojects %}active{% endblock %}
+{% block crumb %}Superadmin • Tahrirlash{% endblock %}
+
+{% block content %}
+
+{# ===================== PAGE HEADER ===================== #}
+<div class="edit-head">
+    <div class="head-left">
+        <h1 class="edit-title">Loyihani tahrirlash</h1>
+        <p class="edit-subtitle">ID: {{ p.id }} <span class="sep">•</span> {{ p.title }}</p>
+    </div>
+    <div class="head-right">
+        <a href="{% url 'superadmin_project_detail' p.id %}" class="btn-ghost-edit">
+            <i class="fa-solid fa-arrow-left"></i> Bekor qilish
+        </a>
+    </div>
+</div>
+
+{# ===================== FORM CARD ===================== #}
+<div class="edit-container">
+    <form method="post" enctype="multipart/form-data" class="modern-edit-form">
+        {% csrf_token %}
+
+        <div class="edit-grid">
+            {% for field in form %}
+            <div class="field-box {% if field.name == 'content' or field.name == 'short_desc' %}wide-field{% endif %}">
+                <label class="field-label" for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+
+                <div class="input-wrapper">
+                    {% if field.field.widget.input_type == 'checkbox' %}
+                        <div class="switch-container">
+                            <span class="switch-text">Ushbu blokni ko'rsatish</span>
+                            <label class="switch">
+                                {{ field }}
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+
+                    {% elif field.field.widget.input_type == 'file' %}
+                        <div class="upload-zone">
+                            {% if field.value %}
+                                <div class="file-preview">
+                                    <i class="fa-solid fa-image"></i>
+                                    <span>Hozirgi: <b>{{ field.value.name|truncatechars:20 }}</b></span>
+                                </div>
+                            {% endif %}
+                            <div class="custom-file-input">
+                                {{ field }}
+                            </div>
+                        </div>
+
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+                </div>
+
+                {% if field.errors %}
+                    <div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ field.errors.0 }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="edit-footer">
+            <button type="submit" class="btn-submit-save">
+                <i class="fa-solid fa-floppy-disk"></i> O'zgarishlarni saqlash
+            </button>
+        </div>
+    </form>
+</div>
+
+{# ===================== MODERN STYLES ===================== #}
+<style>
+    /* 1. Header & Typography */
+    .edit-head { display: flex; justify-content: space-between; align-items: center; padding: 25px 5px; gap: 15px; flex-wrap: wrap; }
+    .edit-title { margin: 0; font-size: 28px; font-weight: 900; color: #fff; }
+    .edit-subtitle { margin: 5px 0 0; color: rgba(234,242,255,0.5); font-size: 14px; }
+    .sep { margin: 0 8px; opacity: 0.3; }
+
+    /* 2. Container & Form */
+    .edit-container { padding-bottom: 50px; }
+    .modern-edit-form {
+        background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px; padding: clamp(15px, 4vw, 35px); backdrop-filter: blur(12px);
+    }
+    .edit-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+
+    @media (min-width: 768px) {
+        .edit-grid { grid-template-columns: 1fr 1fr; }
+        .wide-field { grid-column: span 2; }
+    }
+
+    /* 3. Fields Styling */
+    .field-label { display: block; color: #00d4ff; font-size: 13px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px; }
+
+    input:not([type="checkbox"]), textarea, select {
+        width: 100%; padding: 14px 16px; background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255,255,255,0.1); border-radius: 14px;
+        color: #fff; font-size: 15px; transition: 0.3s; box-sizing: border-box;
+    }
+    input:focus, textarea:focus { border-color: #00d4ff; background: rgba(0, 212, 255, 0.05); outline: none; box-shadow: 0 0 15px rgba(0,212,255,0.1); }
+
+    textarea { min-height: 120px; resize: vertical; }
+
+    /* 4. Switch (Modern Checkbox) */
+    .switch-container {
+        display: flex; justify-content: space-between; align-items: center;
+        background: rgba(255,255,255,0.03); padding: 12px 18px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05);
+    }
+    .switch-text { font-size: 14px; color: rgba(234,242,255,0.7); }
+
+    .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); transition: .4s; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; }
+    input:checked + .slider { background-color: #00d4ff; }
+    input:checked + .slider:before { transform: translateX(22px); }
+    .slider.round { border-radius: 34px; }
+    .slider.round:before { border-radius: 50%; }
+
+    /* 5. File Upload */
+    .upload-zone {
+        background: rgba(0,0,0,0.15); border: 2px dashed rgba(255,255,255,0.1);
+        padding: 15px; border-radius: 16px; text-align: center;
+    }
+    .file-preview { margin-bottom: 10px; color: #00d4ff; font-size: 13px; }
+    .custom-file-input input[type="file"] { font-size: 12px; color: #94a3b8; }
+
+    /* 6. Buttons */
+    .btn-ghost-edit {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 10px 20px; background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+        color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; transition: 0.3s;
+    }
+
+    .edit-footer { margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 25px; }
+    .btn-submit-save {
+        width: 100%; padding: 16px; display: flex; align-items: center; justify-content: center; gap: 10px;
+        background: rgba(0, 212, 255, 0.15); border: 1px solid rgba(0, 212, 255, 0.4);
+        border-radius: 16px; color: #00d4ff; font-size: 16px; font-weight: 800;
+        cursor: pointer; transition: 0.4s; text-transform: uppercase; letter-spacing: 1px;
+    }
+
+
+    .field-error { color: #ef4444; font-size: 12px; margin-top: 8px; display: flex; align-items: center; gap: 5px; }
+</style>
+
+{% endblock %}

@@ -1,0 +1,321 @@
+{% extends "accounts/superadmin/base_superadmin.html" %}
+
+{% block title %}PUBLISHED{% endblock %}
+{% block nav_published %}active{% endblock %}
+{% block crumb %}Superadmin • Yuklangan{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+  <div id="toast-wrap" class="toast-wrap" aria-live="polite">
+    {% for message in messages %}
+      {% if 'sc' in message.tags %}
+        <div class="toast
+          {% if 'success' in message.tags %}toast-success
+          {% elif 'error' in message.tags %}toast-error
+          {% elif 'warning' in message.tags %}toast-warning
+          {% else %}toast-info
+          {% endif %}">
+
+          <div class="toast-dot"></div>
+
+          <div class="toast-icon">
+            {% if 'success' in message.tags %}<i class="fa-solid fa-circle-check"></i>
+            {% elif 'error' in message.tags %}<i class="fa-solid fa-circle-xmark"></i>
+            {% elif 'warning' in message.tags %}<i class="fa-solid fa-triangle-exclamation"></i>
+            {% else %}<i class="fa-solid fa-circle-info"></i>{% endif %}
+          </div>
+
+          <div class="toast-text">{{ message }}</div>
+
+          <button type="button" class="toast-close" onclick="closeToast(this)">×</button>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <style>
+    .toast-wrap { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; width: min(400px, calc(100vw - 40px)); pointer-events: none; }
+    .toast { pointer-events: auto; display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.4); animation: toastIn 0.3s ease forwards; }
+    .toast-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex: 0 0 8px; }
+    .toast-icon { margin-top: 1px; font-size: 18px; }
+    .toast-text { font-size: 14px; line-height: 1.4; color: #f8fafc; flex: 1; word-break: break-word; }
+    .toast-close { background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 20px; line-height: 1; padding: 0 4px; margin-left: 8px; transition: 0.2s; }
+    .toast-close:hover { color: #fff; }
+
+    .toast-success { border-color: rgba(34, 197, 94, 0.4); }
+    .toast-success .toast-dot { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    .toast-success .toast-icon { color: #22c55e; }
+
+    .toast-error { border-color: rgba(239, 68, 68, 0.4); }
+    .toast-error .toast-dot { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+    .toast-error .toast-icon { color: #ef4444; }
+
+    .toast-warning { border-color: rgba(245, 158, 11, 0.4); }
+    .toast-warning .toast-dot { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+    .toast-warning .toast-icon { color: #f59e0b; }
+
+    .toast-info { border-color: rgba(59, 130, 246, 0.4); }
+    .toast-info .toast-dot { background: #3b82f6; box-shadow: 0 0 8px #3b82f6; }
+    .toast-info .toast-icon { color: #3b82f6; }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Mobil ekranlarda toast joylashuvi */
+    @media (max-width: 520px){
+      .toast-wrap{ left: 12px; right: 12px; top: 12px; width: auto; }
+      .toast{ padding: 12px 12px; border-radius: 14px; }
+    }
+  </style>
+
+  <script>
+    function closeToast(btn) {
+      const el = btn.closest('.toast');
+      if (!el) return;
+      el.style.transition = "all 0.3s ease";
+      el.style.opacity = "0";
+      el.style.transform = "translateX(20px)";
+      setTimeout(() => el.remove(), 300);
+    }
+
+    setTimeout(() => {
+      document.querySelectorAll('.toast').forEach((el, i) => {
+        setTimeout(() => {
+          const btn = el.querySelector('.toast-close');
+          if(btn) closeToast(btn);
+        }, i * 300);
+      });
+    }, 4000);
+  </script>
+{% endif %}
+
+<style>
+  /* ===== Page head ===== */
+  .pub-head{
+    display:flex; align-items:flex-end; justify-content:space-between;
+    gap:12px; flex-wrap:wrap; padding:16px 2px;
+  }
+  .pub-title{ margin:0; font-size:26px; }
+  .pub-sub{ color:rgba(234,242,255,.62); font-size:13px; margin-top:6px; }
+
+  /* ===== Desktop table wrapper ===== */
+  .pub-table{ display:block; }
+  .pub-mobile{ display:none; }
+
+  /* ===== Mobile cards ===== */
+  .m-list{ display:flex; flex-direction:column; gap:12px; }
+  .m-item{
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.04);
+    border-radius:18px;
+    padding:12px;
+  }
+  .m-top{
+    display:flex; gap:10px; align-items:flex-start;
+  }
+  .m-img{
+    width:74px; height:56px; border-radius:14px;
+    object-fit:cover;
+    border:1px solid rgba(255,255,255,.10);
+    flex: 0 0 74px;
+    background: rgba(255,255,255,.06);
+  }
+  .m-title{
+    font-weight:800; line-height:1.2;
+    margin:0;
+  }
+  .m-desc{
+    margin:6px 0 0;
+    color:rgba(234,242,255,.62);
+    font-size:12px;
+    line-height:1.55;
+  }
+  .m-meta{
+    display:flex; flex-wrap:wrap;
+    gap:8px; margin-top:10px;
+    color:rgba(234,242,255,.62);
+    font-size:12px;
+  }
+  .m-pill{
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.12);
+    border-radius:999px;
+    padding:6px 10px;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .m-actions{
+    display:flex; gap:8px; flex-wrap:wrap;
+    margin-top:12px;
+  }
+  .m-btn, .m-btn-danger{
+    padding:10px 12px;
+    border-radius:12px;
+    font-weight:700;
+    border:1px solid rgba(255,255,255,.15);
+    background: rgba(255,255,255,.06);
+    color: #eaf2ff;
+    text-decoration:none;
+    display:inline-flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .m-btn-danger{
+    border-color: rgba(239,68,68,.35);
+    background: rgba(239,68,68,.10);
+  }
+  .m-actions .m-btn, .m-actions .m-btn-danger{ flex: 1 1 150px; }
+
+  /* ===== Responsive switch ===== */
+  @media (max-width: 900px){
+    .pub-table{ display:none; }
+    .pub-mobile{ display:block; }
+    .pub-title{ font-size:22px; }
+  }
+
+  @media (max-width: 520px){
+    .m-img{ width:64px; height:50px; flex-basis:64px; border-radius:12px; }
+    .m-actions .m-btn, .m-actions .m-btn-danger{ flex: 1 1 100%; }
+  }
+</style>
+
+<div class="pub-head">
+  <div>
+    <h1 class="pub-title">Yuklangan loyihalar</h1>
+    <div class="pub-sub">Foydalanuvchilarga ko‘rinayotgan loyihalar</div>
+  </div>
+</div>
+
+<div class="card">
+
+  <!-- ===== DESKTOP/TABLE ===== -->
+  <div class="pub-table">
+    <table style="width:100%; border-collapse:separate; border-spacing:0 10px;">
+      <thead>
+        <tr>
+          <th style="text-align:left; font-size:12px; color:rgba(234,242,255,.62); padding:8px 12px;">Loyiha</th>
+          <th style="text-align:left; font-size:12px; color:rgba(234,242,255,.62); padding:8px 12px;">Muallif</th>
+          <th style="text-align:left; font-size:12px; color:rgba(234,242,255,.62); padding:8px 12px;">Yuklangan</th>
+          <th style="text-align:left; font-size:12px; color:rgba(234,242,255,.62); padding:8px 12px;">Amallar</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for p in projects %}
+          <tr style="background: rgba(255,255,255,.04);">
+            <td style="padding:14px 12px; border:1px solid rgba(255,255,255,.10); border-right:none; border-top-left-radius:16px;border-bottom-left-radius:16px;">
+              <div style="display:flex; gap:10px; align-items:flex-start;">
+                {% if p.image %}
+                  <img src="{{ p.image.url }}"
+                       style="width:56px;height:42px;border-radius:12px;object-fit:cover;border:1px solid rgba(255,255,255,.10);">
+                {% else %}
+                  <div style="width:56px;height:42px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);"></div>
+                {% endif %}
+
+                <div>
+                  <b>{{ p.title }}</b>
+                  <div style="color:rgba(234,242,255,.62); font-size:12px; margin-top:6px;">
+                    {{ p.short_desc|truncatechars:90 }}
+                  </div>
+                </div>
+              </div>
+            </td>
+
+            <td style="padding:14px 12px; border-top:1px solid rgba(255,255,255,.10); border-bottom:1px solid rgba(255,255,255,.10); color:rgba(234,242,255,.62);">
+              {% if p.author %}
+  {{ p.author.get_full_name|default:p.author.username }}
+{% else %}
+  {{ p.author_name|default:"(muallif o‘chirilgan)" }}
+{% endif %}
+            </td>
+
+            <td style="padding:14px 12px; border-top:1px solid rgba(255,255,255,.10); border-bottom:1px solid rgba(255,255,255,.10); color:rgba(234,242,255,.62);">
+              {{ p.published_at|date:"H:i d-m-Y" }}
+            </td>
+
+            <td style="padding:14px 12px; border:1px solid rgba(255,255,255,.10); border-left:none; border-top-right-radius:16px;border-bottom-right-radius:16px;">
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <a style="padding:8px 12px; width: 100px; height: 38px; border-radius:12px;border:1px solid rgba(255,255,255,.15);background: rgba(255,255,255,.06); font-weight:650;"
+                   href="{% url 'superadmin_project_edit' p.id %}">
+                  Tahrirlash
+                </a>
+
+                <form method="post"
+                      action="{% url 'superadmin_unpublish' p.id %}"
+                      style="display:inline;"
+                      onsubmit="return confirm('Loyihani publicdan olib tashlamoqchimisiz?');">
+                  {% csrf_token %}
+                  <button type="submit"
+                          style="padding:8px 12px;border-radius:12px;border:1px solid rgba(239,68,68,.35);background: rgba(239,68,68,.10); font-weight:650; cursor:pointer;">
+                    Olib tashlash
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" style="padding:18px; color:rgba(234,242,255,.62); border:none;">
+              Hozircha PUBLISHED yo‘q.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== MOBILE/CARDS ===== -->
+  <div class="pub-mobile">
+    <div class="m-list">
+      {% for p in projects %}
+        <div class="m-item">
+          <div class="m-top">
+            {% if p.image %}
+              <img src="{{ p.image.url }}" class="m-img" alt="{{ p.title }}">
+            {% else %}
+              <div class="m-img"></div>
+            {% endif %}
+
+            <div style="min-width:0;">
+              <p class="m-title">{{ p.title }}</p>
+              <p class="m-desc">{{ p.short_desc|truncatechars:120 }}</p>
+
+              <div class="m-meta">
+                <span class="m-pill"><i class="fa-solid fa-user"></i> {% if p.author %}
+                      {{ p.author.get_full_name|default:p.author.username }}
+                    {% else %}
+                      {{ p.author_name|default:"(muallif o‘chirilgan)" }}
+                    {% endif %}</span>
+                <span class="m-pill"><i class="fa-regular fa-clock"></i> {{ p.published_at|date:"Y-m-d H:i" }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="m-actions">
+            <a class="m-btn" href="{% url 'superadmin_project_edit' p.id %}">
+              <i class="fa-regular fa-pen-to-square"></i> Tahrirlash
+            </a>
+
+            <form method="post"
+                  action="{% url 'superadmin_unpublish' p.id %}"
+                  style="display:inline; margin:0;"
+                  onsubmit="return confirm('Loyihani publicdan olib tashlamoqchimisiz?');">
+              {% csrf_token %}
+              <button type="submit" class="m-btn-danger">
+                <i class="fa-solid fa-ban"></i> Unpublish
+              </button>
+            </form>
+          </div>
+        </div>
+      {% empty %}
+        <div style="padding:18px; color:rgba(234,242,255,.62);">
+          Hozircha PUBLISHED yo‘q.
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
