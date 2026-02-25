@@ -11,12 +11,10 @@ User = get_user_model()
 
 
 def is_superadmin(user):
-    return user.is_authenticated and (user.is_superuser or getattr(user, "role", None) == "SUPERADMIN")
+    return user.is_authenticated and getattr(user, "role", None) == "SUPERADMIN"
 
 def is_admin(user):
-    return user.is_authenticated and (
-            user.is_superuser or user.is_staff or getattr(user, "role", None) == "ADMIN"
-    )
+    return user.is_authenticated and getattr(user, "role", None) == "ADMIN"
 
 
 def login_view(request):
@@ -26,9 +24,7 @@ def login_view(request):
             return redirect("superadmin_admin_list")
         if is_admin(request.user):
             return redirect("admin_dashboard")
-        messages.error(request, "Sizda admin huquqi yo‘q.", extra_tags="lg")
-        logout(request)
-        return redirect("login")
+        return redirect("login")  # boshqa role bo'lsa
 
     if request.method == "POST":
         username = request.POST.get("username", "").strip()
