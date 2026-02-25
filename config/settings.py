@@ -83,12 +83,18 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL and not DEBUG:
+    raise RuntimeError("DATABASE_URL is not set in production!")
+
 DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-        ssl_require=not DEBUG,
-    )
+    "default": dj_database_url.parse(
+        DATABASE_URL
+    ) if DATABASE_URL else {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
 }
 
 
