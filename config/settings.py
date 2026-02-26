@@ -187,3 +187,22 @@ if RAILWAY_S3_ENDPOINT and RAILWAY_S3_BUCKET and not DEBUG:
 
     # Media files base URL
     MEDIA_URL = f"{AWS_S3_ENDPOINT_URL.rstrip('/')}/{AWS_STORAGE_BUCKET_NAME}/"
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django": {"handlers": ["console"], "level": "INFO", "propagate": True},
+        "storages": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
+        "boto3": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
+        "botocore": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
+    },
+}
