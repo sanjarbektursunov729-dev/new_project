@@ -142,7 +142,11 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    }
+    },
+    # default storage (media) - local by default
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
 }
 AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "login"
@@ -172,8 +176,6 @@ RAILWAY_S3_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
 
 # Enable S3 storage only if bucket vars exist
 if RAILWAY_S3_ENDPOINT and RAILWAY_S3_BUCKET and not DEBUG:
-    AWS_S3_ADDRESSING_STYLE = "path"
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
     AWS_S3_ENDPOINT_URL = RAILWAY_S3_ENDPOINT
     AWS_STORAGE_BUCKET_NAME = RAILWAY_S3_BUCKET
@@ -181,14 +183,16 @@ if RAILWAY_S3_ENDPOINT and RAILWAY_S3_BUCKET and not DEBUG:
     AWS_ACCESS_KEY_ID = RAILWAY_S3_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY = RAILWAY_S3_SECRET_ACCESS_KEY
 
-    # Public media URLs (no signed querystring)
+    AWS_S3_ADDRESSING_STYLE = "path"
     AWS_QUERYSTRING_AUTH = True
     AWS_DEFAULT_ACL = None
 
-    # Media files base URL
+    # 🔥 MUHIM — Django 6 uchun
+    STORAGES["default"] = {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    }
+
     MEDIA_URL = f"{AWS_S3_ENDPOINT_URL.rstrip('/')}/{AWS_STORAGE_BUCKET_NAME}/"
-
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
