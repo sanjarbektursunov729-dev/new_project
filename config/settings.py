@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'apps.projects',
     'rest_framework',
     'corsheaders',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -159,3 +160,30 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.AllowAny",
     ),
 }
+
+# ========= MEDIA (uploads) -> Railway S3 Bucket =========
+
+# Railway bucket variables (AWS SDK Generic style)
+RAILWAY_S3_ENDPOINT = os.getenv("AWS_ENDPOINT_URL", "")
+RAILWAY_S3_BUCKET = os.getenv("AWS_S3_BUCKET_NAME", "")
+RAILWAY_S3_REGION = os.getenv("AWS_DEFAULT_REGION", "auto")
+RAILWAY_S3_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
+RAILWAY_S3_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
+
+# Enable S3 storage only if bucket vars exist
+if RAILWAY_S3_ENDPOINT and RAILWAY_S3_BUCKET and not DEBUG:
+    AWS_S3_ADDRESSING_STYLE = "path"
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+    AWS_S3_ENDPOINT_URL = RAILWAY_S3_ENDPOINT
+    AWS_STORAGE_BUCKET_NAME = RAILWAY_S3_BUCKET
+    AWS_S3_REGION_NAME = RAILWAY_S3_REGION
+    AWS_ACCESS_KEY_ID = RAILWAY_S3_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY = RAILWAY_S3_SECRET_ACCESS_KEY
+
+    # Public media URLs (no signed querystring)
+    AWS_QUERYSTRING_AUTH = True
+    AWS_DEFAULT_ACL = None
+
+    # Media files base URL
+    MEDIA_URL = f"{AWS_S3_ENDPOINT_URL.rstrip('/')}/{AWS_STORAGE_BUCKET_NAME}/"
