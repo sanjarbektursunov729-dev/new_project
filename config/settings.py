@@ -145,9 +145,8 @@ if (BASE_DIR / "static").exists():
     STATICFILES_DIRS = [BASE_DIR / "static"]
 STORAGES = {
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",  # ✅ Manifest emas
     },
-    # default storage (media) - local by default
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
