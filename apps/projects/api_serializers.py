@@ -10,7 +10,7 @@ class PublicProjectSerializer(serializers.ModelSerializer):
         fields = [
             "id", "title", "short_desc", "content",
             "youtube_url", "image_url", "zip_url",
-            "published_at",
+            "published_at", "coding_env_note",
         ]
 
     def get_image_url(self, obj):
